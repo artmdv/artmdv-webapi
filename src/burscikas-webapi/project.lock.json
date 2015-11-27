@@ -777,26 +777,6 @@
           "lib/dnx451/Microsoft.AspNet.Server.Kestrel.dll": {}
         }
       },
-      "Microsoft.AspNet.Server.WebListener/1.0.0-rc1-final": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.AspNet.Hosting": "1.0.0-rc1-final",
-          "Microsoft.Net.Http.Headers": "1.0.0-rc1-final",
-          "Microsoft.Net.Http.Server": "1.0.0-rc1-final"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/dnx451/Microsoft.AspNet.Server.WebListener.dll": {}
-        },
-        "runtime": {
-          "lib/dnx451/Microsoft.AspNet.Server.WebListener.dll": {}
-        }
-      },
       "Microsoft.AspNet.StaticFiles/1.0.0-rc1-final": {
         "type": "package",
         "dependencies": {
@@ -1326,41 +1306,6 @@
         },
         "runtime": {
           "lib/net451/Microsoft.Net.Http.Headers.dll": {}
-        }
-      },
-      "Microsoft.Net.Http.Server/1.0.0-rc1-final": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc1-final",
-          "Microsoft.Extensions.Primitives": "1.0.0-rc1-final",
-          "Microsoft.Net.WebSockets": "1.0.0-rc1-final"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net451/Microsoft.Net.Http.Server.dll": {}
-        },
-        "runtime": {
-          "lib/net451/Microsoft.Net.Http.Server.dll": {}
-        }
-      },
-      "Microsoft.Net.WebSockets/1.0.0-rc1-final": {
-        "type": "package",
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net451/Microsoft.Net.WebSockets.dll": {}
-        },
-        "runtime": {
-          "lib/net451/Microsoft.Net.WebSockets.dll": {}
         }
       },
       "Newtonsoft.Json/6.0.6": {
@@ -2243,21 +2188,6 @@
           "lib/dnxcore50/Microsoft.AspNet.Server.Kestrel.dll": {}
         }
       },
-      "Microsoft.AspNet.Server.WebListener/1.0.0-rc1-final": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.AspNet.Hosting": "1.0.0-rc1-final",
-          "Microsoft.Net.Http.Headers": "1.0.0-rc1-final",
-          "Microsoft.Net.Http.Server": "1.0.0-rc1-final",
-          "System.Security.Claims": "4.0.1-beta-23516"
-        },
-        "compile": {
-          "lib/dnxcore50/Microsoft.AspNet.Server.WebListener.dll": {}
-        },
-        "runtime": {
-          "lib/dnxcore50/Microsoft.AspNet.Server.WebListener.dll": {}
-        }
-      },
       "Microsoft.AspNet.StaticFiles/1.0.0-rc1-final": {
         "type": "package",
         "dependencies": {
@@ -2765,60 +2695,17 @@
           "lib/dotnet5.4/Microsoft.Net.Http.Headers.dll": {}
         }
       },
-      "Microsoft.Net.Http.Server/1.0.0-rc1-final": {
+      "Microsoft.Win32.Primitives/4.0.0": {
         "type": "package",
         "dependencies": {
-          "Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc1-final",
-          "Microsoft.Extensions.Primitives": "1.0.0-rc1-final",
-          "Microsoft.Net.WebSockets": "1.0.0-rc1-final",
-          "Microsoft.Win32.Primitives": "4.0.1-beta-23516",
-          "System.Diagnostics.Debug": "4.0.11-beta-23516",
-          "System.IO.FileSystem": "4.0.1-beta-23516",
-          "System.Security.Claims": "4.0.1-beta-23516",
-          "System.Security.Cryptography.X509Certificates": "4.0.0-beta-23516",
-          "System.Security.Principal.Windows": "4.0.0-beta-23516",
-          "System.Threading.Overlapped": "4.0.0-beta-23109"
+          "System.Runtime": "4.0.20",
+          "System.Runtime.InteropServices": "4.0.20"
         },
         "compile": {
-          "lib/dotnet5.4/Microsoft.Net.Http.Server.dll": {}
+          "ref/dotnet/Microsoft.Win32.Primitives.dll": {}
         },
         "runtime": {
-          "lib/dotnet5.4/Microsoft.Net.Http.Server.dll": {}
-        }
-      },
-      "Microsoft.Net.WebSockets/1.0.0-rc1-final": {
-        "type": "package",
-        "dependencies": {
-          "System.Collections": "4.0.11-beta-23516",
-          "System.Diagnostics.Contracts": "4.0.1-beta-23516",
-          "System.Diagnostics.Tools": "4.0.1-beta-23516",
-          "System.IO": "4.0.11-beta-23516",
-          "System.Linq": "4.0.1-beta-23516",
-          "System.Net.Primitives": "4.0.11-beta-23516",
-          "System.Net.WebSockets": "4.0.0-beta-23516",
-          "System.Resources.ResourceManager": "4.0.1-beta-23516",
-          "System.Runtime.Extensions": "4.0.11-beta-23516",
-          "System.Security.Cryptography.Algorithms": "4.0.0-beta-23516",
-          "System.Text.Encoding.Extensions": "4.0.11-beta-23516",
-          "System.Threading": "4.0.11-beta-23516",
-          "System.Threading.Tasks": "4.0.11-beta-23516",
-          "System.Threading.ThreadPool": "4.0.10-beta-23516",
-          "System.Threading.Timer": "4.0.1-beta-23516"
-        },
-        "compile": {
-          "lib/dotnet5.4/Microsoft.Net.WebSockets.dll": {}
-        },
-        "runtime": {
-          "lib/dotnet5.4/Microsoft.Net.WebSockets.dll": {}
-        }
-      },
-      "Microsoft.Win32.Primitives/4.0.1-beta-23516": {
-        "type": "package",
-        "dependencies": {
-          "System.Runtime": "4.0.0"
-        },
-        "compile": {
-          "ref/dotnet5.1/Microsoft.Win32.Primitives.dll": {}
+          "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
       "Microsoft.Win32.Registry/4.0.0-beta-23516": {
@@ -3612,19 +3499,6 @@
         },
         "compile": {
           "ref/dotnet5.4/System.Threading.dll": {}
-        }
-      },
-      "System.Threading.Overlapped/4.0.0-beta-23109": {
-        "type": "package",
-        "dependencies": {
-          "System.Runtime": "4.0.0-beta-23109",
-          "System.Runtime.Handles": "4.0.0-beta-23109"
-        },
-        "compile": {
-          "ref/dotnet/System.Threading.Overlapped.dll": {}
-        },
-        "runtime": {
-          "lib/DNXCore50/System.Threading.Overlapped.dll": {}
         }
       },
       "System.Threading.Tasks/4.0.11-beta-23516": {
@@ -4522,26 +4396,6 @@
           "runtimes/win7-x86/native/libuv.dll": {}
         }
       },
-      "Microsoft.AspNet.Server.WebListener/1.0.0-rc1-final": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.AspNet.Hosting": "1.0.0-rc1-final",
-          "Microsoft.Net.Http.Headers": "1.0.0-rc1-final",
-          "Microsoft.Net.Http.Server": "1.0.0-rc1-final"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/dnx451/Microsoft.AspNet.Server.WebListener.dll": {}
-        },
-        "runtime": {
-          "lib/dnx451/Microsoft.AspNet.Server.WebListener.dll": {}
-        }
-      },
       "Microsoft.AspNet.StaticFiles/1.0.0-rc1-final": {
         "type": "package",
         "dependencies": {
@@ -5071,41 +4925,6 @@
         },
         "runtime": {
           "lib/net451/Microsoft.Net.Http.Headers.dll": {}
-        }
-      },
-      "Microsoft.Net.Http.Server/1.0.0-rc1-final": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc1-final",
-          "Microsoft.Extensions.Primitives": "1.0.0-rc1-final",
-          "Microsoft.Net.WebSockets": "1.0.0-rc1-final"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net451/Microsoft.Net.Http.Server.dll": {}
-        },
-        "runtime": {
-          "lib/net451/Microsoft.Net.Http.Server.dll": {}
-        }
-      },
-      "Microsoft.Net.WebSockets/1.0.0-rc1-final": {
-        "type": "package",
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net451/Microsoft.Net.WebSockets.dll": {}
-        },
-        "runtime": {
-          "lib/net451/Microsoft.Net.WebSockets.dll": {}
         }
       },
       "Newtonsoft.Json/6.0.6": {
@@ -6107,26 +5926,6 @@
           "runtimes/win7-x64/native/libuv.dll": {}
         }
       },
-      "Microsoft.AspNet.Server.WebListener/1.0.0-rc1-final": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.AspNet.Hosting": "1.0.0-rc1-final",
-          "Microsoft.Net.Http.Headers": "1.0.0-rc1-final",
-          "Microsoft.Net.Http.Server": "1.0.0-rc1-final"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/dnx451/Microsoft.AspNet.Server.WebListener.dll": {}
-        },
-        "runtime": {
-          "lib/dnx451/Microsoft.AspNet.Server.WebListener.dll": {}
-        }
-      },
       "Microsoft.AspNet.StaticFiles/1.0.0-rc1-final": {
         "type": "package",
         "dependencies": {
@@ -6656,41 +6455,6 @@
         },
         "runtime": {
           "lib/net451/Microsoft.Net.Http.Headers.dll": {}
-        }
-      },
-      "Microsoft.Net.Http.Server/1.0.0-rc1-final": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc1-final",
-          "Microsoft.Extensions.Primitives": "1.0.0-rc1-final",
-          "Microsoft.Net.WebSockets": "1.0.0-rc1-final"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net451/Microsoft.Net.Http.Server.dll": {}
-        },
-        "runtime": {
-          "lib/net451/Microsoft.Net.Http.Server.dll": {}
-        }
-      },
-      "Microsoft.Net.WebSockets/1.0.0-rc1-final": {
-        "type": "package",
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net451/Microsoft.Net.WebSockets.dll": {}
-        },
-        "runtime": {
-          "lib/net451/Microsoft.Net.WebSockets.dll": {}
         }
       },
       "Newtonsoft.Json/6.0.6": {
@@ -7576,21 +7340,6 @@
           "runtimes/win7-x86/native/libuv.dll": {}
         }
       },
-      "Microsoft.AspNet.Server.WebListener/1.0.0-rc1-final": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.AspNet.Hosting": "1.0.0-rc1-final",
-          "Microsoft.Net.Http.Headers": "1.0.0-rc1-final",
-          "Microsoft.Net.Http.Server": "1.0.0-rc1-final",
-          "System.Security.Claims": "4.0.1-beta-23516"
-        },
-        "compile": {
-          "lib/dnxcore50/Microsoft.AspNet.Server.WebListener.dll": {}
-        },
-        "runtime": {
-          "lib/dnxcore50/Microsoft.AspNet.Server.WebListener.dll": {}
-        }
-      },
       "Microsoft.AspNet.StaticFiles/1.0.0-rc1-final": {
         "type": "package",
         "dependencies": {
@@ -8098,60 +7847,17 @@
           "lib/dotnet5.4/Microsoft.Net.Http.Headers.dll": {}
         }
       },
-      "Microsoft.Net.Http.Server/1.0.0-rc1-final": {
+      "Microsoft.Win32.Primitives/4.0.0": {
         "type": "package",
         "dependencies": {
-          "Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc1-final",
-          "Microsoft.Extensions.Primitives": "1.0.0-rc1-final",
-          "Microsoft.Net.WebSockets": "1.0.0-rc1-final",
-          "Microsoft.Win32.Primitives": "4.0.1-beta-23516",
-          "System.Diagnostics.Debug": "4.0.11-beta-23516",
-          "System.IO.FileSystem": "4.0.1-beta-23516",
-          "System.Security.Claims": "4.0.1-beta-23516",
-          "System.Security.Cryptography.X509Certificates": "4.0.0-beta-23516",
-          "System.Security.Principal.Windows": "4.0.0-beta-23516",
-          "System.Threading.Overlapped": "4.0.0-beta-23109"
+          "System.Runtime": "4.0.20",
+          "System.Runtime.InteropServices": "4.0.20"
         },
         "compile": {
-          "lib/dotnet5.4/Microsoft.Net.Http.Server.dll": {}
+          "ref/dotnet/Microsoft.Win32.Primitives.dll": {}
         },
         "runtime": {
-          "lib/dotnet5.4/Microsoft.Net.Http.Server.dll": {}
-        }
-      },
-      "Microsoft.Net.WebSockets/1.0.0-rc1-final": {
-        "type": "package",
-        "dependencies": {
-          "System.Collections": "4.0.11-beta-23516",
-          "System.Diagnostics.Contracts": "4.0.1-beta-23516",
-          "System.Diagnostics.Tools": "4.0.1-beta-23516",
-          "System.IO": "4.0.11-beta-23516",
-          "System.Linq": "4.0.1-beta-23516",
-          "System.Net.Primitives": "4.0.11-beta-23516",
-          "System.Net.WebSockets": "4.0.0-beta-23516",
-          "System.Resources.ResourceManager": "4.0.1-beta-23516",
-          "System.Runtime.Extensions": "4.0.11-beta-23516",
-          "System.Security.Cryptography.Algorithms": "4.0.0-beta-23516",
-          "System.Text.Encoding.Extensions": "4.0.11-beta-23516",
-          "System.Threading": "4.0.11-beta-23516",
-          "System.Threading.Tasks": "4.0.11-beta-23516",
-          "System.Threading.ThreadPool": "4.0.10-beta-23516",
-          "System.Threading.Timer": "4.0.1-beta-23516"
-        },
-        "compile": {
-          "lib/dotnet5.4/Microsoft.Net.WebSockets.dll": {}
-        },
-        "runtime": {
-          "lib/dotnet5.4/Microsoft.Net.WebSockets.dll": {}
-        }
-      },
-      "Microsoft.Win32.Primitives/4.0.1-beta-23516": {
-        "type": "package",
-        "dependencies": {
-          "System.Runtime": "4.0.0"
-        },
-        "compile": {
-          "ref/dotnet5.1/Microsoft.Win32.Primitives.dll": {}
+          "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
       "Microsoft.Win32.Registry/4.0.0-beta-23516": {
@@ -8207,19 +7913,6 @@
         },
         "runtime": {
           "lib/DNXCore50/System.Linq.Expressions.dll": {}
-        }
-      },
-      "runtime.win7.Microsoft.Win32.Primitives/4.0.1-beta-23516": {
-        "type": "package",
-        "dependencies": {
-          "System.Runtime": "4.0.20",
-          "System.Runtime.InteropServices": "4.0.20"
-        },
-        "compile": {
-          "ref/dotnet/_._": {}
-        },
-        "runtime": {
-          "runtimes/win7/lib/dotnet5.4/Microsoft.Win32.Primitives.dll": {}
         }
       },
       "runtime.win7.System.Console/4.0.0-beta-23516": {
@@ -10145,21 +9838,6 @@
           "runtimes/win7-x64/native/libuv.dll": {}
         }
       },
-      "Microsoft.AspNet.Server.WebListener/1.0.0-rc1-final": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.AspNet.Hosting": "1.0.0-rc1-final",
-          "Microsoft.Net.Http.Headers": "1.0.0-rc1-final",
-          "Microsoft.Net.Http.Server": "1.0.0-rc1-final",
-          "System.Security.Claims": "4.0.1-beta-23516"
-        },
-        "compile": {
-          "lib/dnxcore50/Microsoft.AspNet.Server.WebListener.dll": {}
-        },
-        "runtime": {
-          "lib/dnxcore50/Microsoft.AspNet.Server.WebListener.dll": {}
-        }
-      },
       "Microsoft.AspNet.StaticFiles/1.0.0-rc1-final": {
         "type": "package",
         "dependencies": {
@@ -10667,60 +10345,17 @@
           "lib/dotnet5.4/Microsoft.Net.Http.Headers.dll": {}
         }
       },
-      "Microsoft.Net.Http.Server/1.0.0-rc1-final": {
+      "Microsoft.Win32.Primitives/4.0.0": {
         "type": "package",
         "dependencies": {
-          "Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc1-final",
-          "Microsoft.Extensions.Primitives": "1.0.0-rc1-final",
-          "Microsoft.Net.WebSockets": "1.0.0-rc1-final",
-          "Microsoft.Win32.Primitives": "4.0.1-beta-23516",
-          "System.Diagnostics.Debug": "4.0.11-beta-23516",
-          "System.IO.FileSystem": "4.0.1-beta-23516",
-          "System.Security.Claims": "4.0.1-beta-23516",
-          "System.Security.Cryptography.X509Certificates": "4.0.0-beta-23516",
-          "System.Security.Principal.Windows": "4.0.0-beta-23516",
-          "System.Threading.Overlapped": "4.0.0-beta-23109"
+          "System.Runtime": "4.0.20",
+          "System.Runtime.InteropServices": "4.0.20"
         },
         "compile": {
-          "lib/dotnet5.4/Microsoft.Net.Http.Server.dll": {}
+          "ref/dotnet/Microsoft.Win32.Primitives.dll": {}
         },
         "runtime": {
-          "lib/dotnet5.4/Microsoft.Net.Http.Server.dll": {}
-        }
-      },
-      "Microsoft.Net.WebSockets/1.0.0-rc1-final": {
-        "type": "package",
-        "dependencies": {
-          "System.Collections": "4.0.11-beta-23516",
-          "System.Diagnostics.Contracts": "4.0.1-beta-23516",
-          "System.Diagnostics.Tools": "4.0.1-beta-23516",
-          "System.IO": "4.0.11-beta-23516",
-          "System.Linq": "4.0.1-beta-23516",
-          "System.Net.Primitives": "4.0.11-beta-23516",
-          "System.Net.WebSockets": "4.0.0-beta-23516",
-          "System.Resources.ResourceManager": "4.0.1-beta-23516",
-          "System.Runtime.Extensions": "4.0.11-beta-23516",
-          "System.Security.Cryptography.Algorithms": "4.0.0-beta-23516",
-          "System.Text.Encoding.Extensions": "4.0.11-beta-23516",
-          "System.Threading": "4.0.11-beta-23516",
-          "System.Threading.Tasks": "4.0.11-beta-23516",
-          "System.Threading.ThreadPool": "4.0.10-beta-23516",
-          "System.Threading.Timer": "4.0.1-beta-23516"
-        },
-        "compile": {
-          "lib/dotnet5.4/Microsoft.Net.WebSockets.dll": {}
-        },
-        "runtime": {
-          "lib/dotnet5.4/Microsoft.Net.WebSockets.dll": {}
-        }
-      },
-      "Microsoft.Win32.Primitives/4.0.1-beta-23516": {
-        "type": "package",
-        "dependencies": {
-          "System.Runtime": "4.0.0"
-        },
-        "compile": {
-          "ref/dotnet5.1/Microsoft.Win32.Primitives.dll": {}
+          "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
       "Microsoft.Win32.Registry/4.0.0-beta-23516": {
@@ -10776,19 +10411,6 @@
         },
         "runtime": {
           "lib/DNXCore50/System.Linq.Expressions.dll": {}
-        }
-      },
-      "runtime.win7.Microsoft.Win32.Primitives/4.0.1-beta-23516": {
-        "type": "package",
-        "dependencies": {
-          "System.Runtime": "4.0.20",
-          "System.Runtime.InteropServices": "4.0.20"
-        },
-        "compile": {
-          "ref/dotnet/_._": {}
-        },
-        "runtime": {
-          "runtimes/win7/lib/dotnet5.4/Microsoft.Win32.Primitives.dll": {}
         }
       },
       "runtime.win7.System.Console/4.0.0-beta-23516": {
@@ -12598,24 +12220,6 @@
         "thirdpartynotices.txt"
       ]
     },
-    "Microsoft.AspNet.Server.WebListener/1.0.0-rc1-final": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "U1S48H06oKFHVth/1xUtylpa0E4tBDYtxpzfELeZ1aNW3fdOqcd20dlh6bapOP78R+axSY1DI/FR8dGGgn+84Q==",
-      "files": [
-        "lib/dnx451/Microsoft.AspNet.Server.WebListener.dll",
-        "lib/dnx451/Microsoft.AspNet.Server.WebListener.xml",
-        "lib/dnxcore50/Microsoft.AspNet.Server.WebListener.dll",
-        "lib/dnxcore50/Microsoft.AspNet.Server.WebListener.xml",
-        "lib/dotnet5.4/Microsoft.AspNet.Server.WebListener.dll",
-        "lib/dotnet5.4/Microsoft.AspNet.Server.WebListener.xml",
-        "lib/net451/Microsoft.AspNet.Server.WebListener.dll",
-        "lib/net451/Microsoft.AspNet.Server.WebListener.xml",
-        "Microsoft.AspNet.Server.WebListener.1.0.0-rc1-final.nupkg",
-        "Microsoft.AspNet.Server.WebListener.1.0.0-rc1-final.nupkg.sha512",
-        "Microsoft.AspNet.Server.WebListener.nuspec"
-      ]
-    },
     "Microsoft.AspNet.StaticFiles/1.0.0-rc1-final": {
       "type": "package",
       "serviceable": true,
@@ -13132,64 +12736,36 @@
         "Microsoft.Net.Http.Headers.nuspec"
       ]
     },
-    "Microsoft.Net.Http.Server/1.0.0-rc1-final": {
+    "Microsoft.Win32.Primitives/4.0.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "XQMZUf0SbVzjTX0vyiVr0LP3Cygy1wCPDZmDla9Yeqc07HvSZ02Sg4qTSKiNV2h85yY3Dka+MNmL3XoYmnsEAA==",
+      "sha512": "CypEz9/lLOup8CEhiAmvr7aLs1zKPYyEU1sxQeEr6G0Ci8/F0Y6pYR1zzkROjM8j8Mq0typmbu676oYyvErQvg==",
       "files": [
-        "lib/dotnet5.4/Microsoft.Net.Http.Server.dll",
-        "lib/dotnet5.4/Microsoft.Net.Http.Server.xml",
-        "lib/net451/Microsoft.Net.Http.Server.dll",
-        "lib/net451/Microsoft.Net.Http.Server.xml",
-        "Microsoft.Net.Http.Server.1.0.0-rc1-final.nupkg",
-        "Microsoft.Net.Http.Server.1.0.0-rc1-final.nupkg.sha512",
-        "Microsoft.Net.Http.Server.nuspec"
-      ]
-    },
-    "Microsoft.Net.WebSockets/1.0.0-rc1-final": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "DIzmA7s2sNBEq+Wz5cCPFAYKx1WGiLE7iCVrA7Lvhxf/+EzPWeaKlCYvjSHTPNViZsX/eUI5vsiDmqK/5tZjQA==",
-      "files": [
-        "lib/dotnet5.4/Microsoft.Net.WebSockets.dll",
-        "lib/dotnet5.4/Microsoft.Net.WebSockets.xml",
-        "lib/net451/Microsoft.Net.WebSockets.dll",
-        "lib/net451/Microsoft.Net.WebSockets.xml",
-        "Microsoft.Net.WebSockets.1.0.0-rc1-final.nupkg",
-        "Microsoft.Net.WebSockets.1.0.0-rc1-final.nupkg.sha512",
-        "Microsoft.Net.WebSockets.nuspec"
-      ]
-    },
-    "Microsoft.Win32.Primitives/4.0.1-beta-23516": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "x3wZL4d1CnJzk5n4yW01rpWsZ69g6e5aOBQY3vAIe8Rp4Lr5mQlRil7YoCgyeGYBFcd+Ab5KEyXAi8QYSR83Aw==",
-      "files": [
+        "lib/dotnet/Microsoft.Win32.Primitives.dll",
         "lib/MonoAndroid10/_._",
         "lib/MonoTouch10/_._",
         "lib/net46/Microsoft.Win32.Primitives.dll",
         "lib/xamarinios10/_._",
         "lib/xamarinmac20/_._",
-        "Microsoft.Win32.Primitives.4.0.1-beta-23516.nupkg",
-        "Microsoft.Win32.Primitives.4.0.1-beta-23516.nupkg.sha512",
+        "Microsoft.Win32.Primitives.4.0.0.nupkg",
+        "Microsoft.Win32.Primitives.4.0.0.nupkg.sha512",
         "Microsoft.Win32.Primitives.nuspec",
-        "ref/dotnet5.1/de/Microsoft.Win32.Primitives.xml",
-        "ref/dotnet5.1/es/Microsoft.Win32.Primitives.xml",
-        "ref/dotnet5.1/fr/Microsoft.Win32.Primitives.xml",
-        "ref/dotnet5.1/it/Microsoft.Win32.Primitives.xml",
-        "ref/dotnet5.1/ja/Microsoft.Win32.Primitives.xml",
-        "ref/dotnet5.1/ko/Microsoft.Win32.Primitives.xml",
-        "ref/dotnet5.1/Microsoft.Win32.Primitives.dll",
-        "ref/dotnet5.1/Microsoft.Win32.Primitives.xml",
-        "ref/dotnet5.1/ru/Microsoft.Win32.Primitives.xml",
-        "ref/dotnet5.1/zh-hans/Microsoft.Win32.Primitives.xml",
-        "ref/dotnet5.1/zh-hant/Microsoft.Win32.Primitives.xml",
+        "ref/dotnet/de/Microsoft.Win32.Primitives.xml",
+        "ref/dotnet/es/Microsoft.Win32.Primitives.xml",
+        "ref/dotnet/fr/Microsoft.Win32.Primitives.xml",
+        "ref/dotnet/it/Microsoft.Win32.Primitives.xml",
+        "ref/dotnet/ja/Microsoft.Win32.Primitives.xml",
+        "ref/dotnet/ko/Microsoft.Win32.Primitives.xml",
+        "ref/dotnet/Microsoft.Win32.Primitives.dll",
+        "ref/dotnet/Microsoft.Win32.Primitives.xml",
+        "ref/dotnet/ru/Microsoft.Win32.Primitives.xml",
+        "ref/dotnet/zh-hans/Microsoft.Win32.Primitives.xml",
+        "ref/dotnet/zh-hant/Microsoft.Win32.Primitives.xml",
         "ref/MonoAndroid10/_._",
         "ref/MonoTouch10/_._",
         "ref/net46/Microsoft.Win32.Primitives.dll",
         "ref/xamarinios10/_._",
-        "ref/xamarinmac20/_._",
-        "runtime.json"
+        "ref/xamarinmac20/_._"
       ]
     },
     "Microsoft.Win32.Registry/4.0.0-beta-23516": {
@@ -13260,19 +12836,6 @@
         "runtime.any.System.Linq.Expressions.4.0.11-beta-23516.nupkg.sha512",
         "runtime.any.System.Linq.Expressions.nuspec",
         "runtimes/aot/lib/netcore50/_._"
-      ]
-    },
-    "runtime.win7.Microsoft.Win32.Primitives/4.0.1-beta-23516": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "ITgyW8QXcUEb/FnWPPpStXhVCxhjZLxiiW7X67X2n2wQ1UGTVCbj6UayctzfjAEv2J1/aNxdLNzu0fLW4j8Fqg==",
-      "files": [
-        "ref/dotnet/_._",
-        "runtime.win7.Microsoft.Win32.Primitives.4.0.1-beta-23516.nupkg",
-        "runtime.win7.Microsoft.Win32.Primitives.4.0.1-beta-23516.nupkg.sha512",
-        "runtime.win7.Microsoft.Win32.Primitives.nuspec",
-        "runtimes/win7/lib/dotnet5.4/Microsoft.Win32.Primitives.dll",
-        "runtimes/win7/lib/net/_._"
       ]
     },
     "runtime.win7.System.Console/4.0.0-beta-23516": {
@@ -16615,31 +16178,6 @@
         "System.Threading.nuspec"
       ]
     },
-    "System.Threading.Overlapped/4.0.0-beta-23109": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "IMVmv9x4lBiy+jz31dU7KT/aTDlKZabAEDFAxQOTv//v1RYu5XZXZLIiTZqyVUKxxHgB0PUnuSDl5VxUDKysfQ==",
-      "files": [
-        "lib/DNXCore50/System.Threading.Overlapped.dll",
-        "lib/net46/System.Threading.Overlapped.dll",
-        "lib/netcore50/System.Threading.Overlapped.dll",
-        "ref/dotnet/de/System.Threading.Overlapped.xml",
-        "ref/dotnet/es/System.Threading.Overlapped.xml",
-        "ref/dotnet/fr/System.Threading.Overlapped.xml",
-        "ref/dotnet/it/System.Threading.Overlapped.xml",
-        "ref/dotnet/ja/System.Threading.Overlapped.xml",
-        "ref/dotnet/ko/System.Threading.Overlapped.xml",
-        "ref/dotnet/ru/System.Threading.Overlapped.xml",
-        "ref/dotnet/System.Threading.Overlapped.dll",
-        "ref/dotnet/System.Threading.Overlapped.xml",
-        "ref/dotnet/zh-hans/System.Threading.Overlapped.xml",
-        "ref/dotnet/zh-hant/System.Threading.Overlapped.xml",
-        "ref/net46/System.Threading.Overlapped.dll",
-        "System.Threading.Overlapped.4.0.0-beta-23109.nupkg",
-        "System.Threading.Overlapped.4.0.0-beta-23109.nupkg.sha512",
-        "System.Threading.Overlapped.nuspec"
-      ]
-    },
     "System.Threading.Overlapped/4.0.0": {
       "type": "package",
       "serviceable": true,
@@ -16972,7 +16510,6 @@
       "Microsoft.AspNet.Server.Kestrel >= 1.0.0-rc1-final",
       "Microsoft.AspNet.Diagnostics >= 1.0.0-*",
       "Microsoft.AspNet.IISPlatformHandler >= 1.0.0-rc1-final",
-      "Microsoft.AspNet.Server.WebListener >= 1.0.0-rc1-final",
       "Microsoft.AspNet.StaticFiles >= 1.0.0-rc1-final"
     ],
     "DNX,Version=v4.5.1": [
