@@ -3,7 +3,7 @@ using Microsoft.AspNet.Mvc;
 
 namespace burscikas_webapi.Controllers
 {
-//    [Route("[controller]")]
+    [Route("[controller]")]
     public class ValuesController : Controller
     {
         // GET: values
@@ -18,12 +18,6 @@ namespace burscikas_webapi.Controllers
         public string Get(int id)
         {
             return "value";
-        }
-
-        [HttpGet]
-        public string Test(string test)
-        {
-            return test;
         }
 
         // POST values
