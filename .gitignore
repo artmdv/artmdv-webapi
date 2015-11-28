@@ -7,3 +7,4 @@ report/*
 coverage/*
 build/*
 *.ncrunch*
+*vs/config/applicationhost.config
