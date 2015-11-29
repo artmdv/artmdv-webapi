@@ -9,3 +9,4 @@ build/*
 *.ncrunch*
 *vs/config/applicationhost.config
 *.xproj.user
+*/project.lock.json
