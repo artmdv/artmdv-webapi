@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using burscikas_webapi.Models;
+using Microsoft.AspNet.Cors;
 using Microsoft.AspNet.Mvc;
 
 namespace burscikas_webapi.Controllers
 {
     [Route("[controller]")]
+    [EnableCors("default")]
     public class AstrophotographyController : Controller
     {
         // GET: values
@@ -19,7 +21,7 @@ namespace burscikas_webapi.Controllers
             list.Add(new AstroImage() { Image = "M81_M82.jpg", Thumbnail = "M81_M82_thumb.jpg", Title = "M81 Bode's galaxy and M82 Cigar galaxy" });
             list.Add(new AstroImage() { Image = "milky-way.jpg", Thumbnail = "milky-way_thumb.jpg", Title = "Milky Way" });
             list.Add(new AstroImage() { Image = "NGC7331.jpg", Thumbnail = "NGC7331_thumb.jpg", Title = "NGC 7331 and friends" });
-            return null;
+            return list;
         }
 
 //        // GET values/5
