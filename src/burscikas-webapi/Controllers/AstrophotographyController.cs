@@ -14,15 +14,16 @@ namespace burscikas_webapi.Controllers
         public IEnumerable<AstroImage> Get()
         {
             var list = new List<AstroImage>();
-            list.Add(new AstroImage() { Image = "NGC6995.jpg", Thumbnail = "NGC6995_thumb.jpg", Title = "NGC 6995 Eastern Veil nebula" });
-            list.Add(new AstroImage() { Image = "M16.jpg", Thumbnail = "M16_thumb.jpg", Title = "M16 Eagle nebula" });
-            list.Add(new AstroImage() { Image = "M51.jpg", Thumbnail = "M51_thumb.jpg", Title = "M51 Whirlpool galaxy" });
-            list.Add(new AstroImage() { Image = "M57.jpg", Thumbnail = "M57_thumb.jpg", Title = "M57 Ring nebula" });
-            list.Add(new AstroImage() { Image = "M81_M82.jpg", Thumbnail = "M81_M82_thumb.jpg", Title = "M81 Bode's galaxy and M82 Cigar galaxy" });
-            list.Add(new AstroImage() { Image = "milky-way.jpg", Thumbnail = "milky-way_thumb.jpg", Title = "Milky Way" });
-            list.Add(new AstroImage() { Image = "NGC7331.jpg", Thumbnail = "NGC7331_thumb.jpg", Title = "NGC 7331 and friends" });
+            list.Add(new AstroImage() { Image = "images/ap/NGC6995.jpg", Thumbnail = "images/ap/NGC6995_thumb.jpg", Title = "NGC 6995 Eastern Veil nebula" });
+            list.Add(new AstroImage() { Image = "images/ap/M16.jpg", Thumbnail = "images/ap/M16_thumb.jpg", Title = "M16 Eagle nebula" });
+            list.Add(new AstroImage() { Image = "images/ap/M51.jpg", Thumbnail = "images/ap/M51_thumb.jpg", Title = "M51 Whirlpool galaxy" });
+            list.Add(new AstroImage() { Image = "images/ap/M57.jpg", Thumbnail = "images/ap/M57_thumb.jpg", Title = "M57 Ring nebula" });
+            list.Add(new AstroImage() { Image = "images/ap/M81_M82.jpg", Thumbnail = "images/ap/M81_M82_thumb.jpg", Title = "M81 Bode's galaxy and M82 Cigar galaxy" });
+            list.Add(new AstroImage() { Image = "images/ap/milky-way.jpg", Thumbnail = "images/ap/milky-way_thumb.jpg", Title = "Milky Way" });
+            list.Add(new AstroImage() { Image = "images/ap/NGC7331.jpg", Thumbnail = "images/ap/NGC7331_thumb.jpg", Title = "NGC 7331 and friends" });
             return list;
         }
+
 
 //        // GET values/5
 //        [HttpGet("{id}")]
