@@ -7,6 +7,6 @@ report/*
 coverage/*
 build/*
 *.ncrunch*
-*vs/config/applicationhost.config
+*vs/*
 *.xproj.user
 */project.lock.json
