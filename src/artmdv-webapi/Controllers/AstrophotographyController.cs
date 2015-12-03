@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using burscikas_webapi.Models;
+using artmdv_webapi.Models;
 using Microsoft.AspNet.Cors;
 using Microsoft.AspNet.Mvc;
 
-namespace burscikas_webapi.Controllers
+namespace artmdv_webapi.Controllers
 {
     [Route("[controller]")]
     [EnableCors("default")]

@@ -1,4 +1,4 @@
-﻿namespace burscikas_webapi.Models
+﻿namespace artmdv_webapi.Models
 {
     public class AstroImage
     {

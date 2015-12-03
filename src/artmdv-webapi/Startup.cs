@@ -10,7 +10,7 @@ using Microsoft.AspNet.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNet.Mvc.WebApiCompatShim;
 
-namespace burscikas_webapi
+namespace artmdv_webapi
 {
     public class Startup
     {
