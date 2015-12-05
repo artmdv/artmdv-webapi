@@ -7,4 +7,4 @@ packages/*
 **/bin/*
 *.crunch*
 _NCrunch_artmdv-webapi/*
-C:\Projects\personal\artmdv-webapi\src\artmdv-webapi\project.lock.json
+**/project.lock.json
