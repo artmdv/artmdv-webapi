@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using artmdv_webapi.Models;
 using Microsoft.AspNet.Cors;
 using Microsoft.AspNet.Mvc;
@@ -24,6 +25,11 @@ namespace artmdv_webapi.Controllers
             return list;
         }
 
+        [HttpPost]
+        public Guid UploadImage()
+        {
+            return Guid.NewGuid();
+        }
 
 //        // GET values/5
 //        [HttpGet("{id}")]

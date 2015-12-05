@@ -1,4 +1,4 @@
-﻿{
+{
   "webroot": "wwwroot",
   "version": "1.0.0-*",
 
@@ -19,9 +19,9 @@
 
   "frameworks": {
     "dnx451": {
-      "dependencies": {
-        "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0-rc1-final"
-      }
+        "dependencies": {
+            "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0-rc1-final"
+        }
     },
     "dnxcore50": { }
   },
