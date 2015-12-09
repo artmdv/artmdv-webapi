@@ -9,8 +9,9 @@
     "Microsoft.AspNet.IISPlatformHandler": "1.0.0-rc1-final",
     "Microsoft.AspNet.StaticFiles": "1.0.0-rc1-final",
     "Microsoft.AspNet.Mvc.WebApiCompatShim": "6.0.0-rc1-final",
+    "Microsoft.AspNet.Mvc.Cors": "6.0.0-rc1-final",
     "Microsoft.AspNet.Cors": "6.0.0-rc1-final",
-    "Microsoft.AspNet.Mvc.Cors": "6.0.0-rc1-final"
+    "data-access": "1.0.0-*"
   },
 
   "commands": {
@@ -22,8 +23,7 @@
         "dependencies": {
             "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0-rc1-final"
         }
-    },
-    "dnxcore50": { }
+    }
   },
 
   "exclude": [

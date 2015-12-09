@@ -1,0 +1,18 @@
+{
+  "version": "1.0.0-*",
+  "description": "data-access Class Library",
+  "authors": [ "artur" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "frameworks": {
+    "net451": {
+      "dependencies": {
+        "MongoDB.Driver": "2.2.0",
+        "MongoDB.Driver.GridFS": "2.2.0"
+      }
+    }
+    
+  }
+}
