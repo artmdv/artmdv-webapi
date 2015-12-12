@@ -2,17 +2,19 @@
   "webroot": "wwwroot",
   "version": "1.0.0-*",
 
-  "dependencies": {
-    "Microsoft.AspNet.Mvc": "6.0.0-rc1-final",
-    "Microsoft.AspNet.Server.Kestrel": "1.0.0-rc1-final",
-    "Microsoft.AspNet.Diagnostics": "1.0.0-*",
-    "Microsoft.AspNet.IISPlatformHandler": "1.0.0-rc1-final",
-    "Microsoft.AspNet.StaticFiles": "1.0.0-rc1-final",
-    "Microsoft.AspNet.Mvc.WebApiCompatShim": "6.0.0-rc1-final",
-    "Microsoft.AspNet.Mvc.Cors": "6.0.0-rc1-final",
-    "Microsoft.AspNet.Cors": "6.0.0-rc1-final",
-    "data-access": "1.0.0-*"
-  },
+    "dependencies": {
+        "Microsoft.AspNet.Mvc": "6.0.0-rc1-final",
+        "Microsoft.AspNet.Server.Kestrel": "1.0.0-rc1-final",
+        "Microsoft.AspNet.Diagnostics": "1.0.0-*",
+        "Microsoft.AspNet.IISPlatformHandler": "1.0.0-rc1-final",
+        "Microsoft.AspNet.StaticFiles": "1.0.0-rc1-final",
+        "Microsoft.AspNet.Mvc.WebApiCompatShim": "6.0.0-rc1-final",
+        "Microsoft.AspNet.Mvc.Cors": "6.0.0-rc1-final",
+        "Microsoft.AspNet.Cors": "6.0.0-rc1-final",
+        "data-access": "1.0.0-*",
+        "Mvc2": "2.0.1",
+        "Microsoft.AspNet.WebApi.Core": "5.2.3"
+    },
 
   "commands": {
     "kestrel": "Microsoft.AspNet.Hosting --server Microsoft.AspNet.Server.Kestrel --server.urls http://localhost:5004"

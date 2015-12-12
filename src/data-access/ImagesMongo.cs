@@ -6,9 +6,8 @@ namespace data_access
 {
     public class ImagesMongo : MongoBase, IImagesDataAccess
     {
-        public ImagesMongo(string password) : base("images")
+        public ImagesMongo() : base("images")
         {
-            Authorize(password);
         }
 
         public FileStream Get(Guid guid)

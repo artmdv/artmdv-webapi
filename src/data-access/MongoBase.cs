@@ -25,15 +25,5 @@ namespace data_access
             var id = gridFs.UploadFromStream(filename, fileStream);
             return id;
         }
-
-        protected void Authorize(string password)
-        {
-            var collection = _database.GetCollection<BsonDocument>("security");
-            var result = collection.FindSync("password");
-            if (result.Current.ToString() != password)
-            {
-                throw new UnauthorizedAccessException();
-            }
-        }
     }
 }
