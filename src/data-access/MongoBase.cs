@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
@@ -23,6 +24,16 @@ namespace data_access
             var gridFs = new GridFSBucket(_database);
             var id = gridFs.UploadFromStream(filename, fileStream);
             return id;
+        }
+
+        protected void Authorize(string password)
+        {
+            var collection = _database.GetCollection<BsonDocument>("security");
+            var result = collection.FindSync("password");
+            if (result.Current.ToString() != password)
+            {
+                throw new UnauthorizedAccessException();
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using artmdv_webapi.Models;
+using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Cors;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Mvc;
@@ -15,6 +16,7 @@ namespace artmdv_webapi.Controllers
     [EnableCors("default")]
     public class AstrophotosController : Controller
     {
+        [AllowAnonymous]
         // GET: values
         [HttpGet]
         public IEnumerable<AstroImage> Get()
@@ -64,17 +66,16 @@ namespace artmdv_webapi.Controllers
             });
             return list;
         }
-
+        
         [HttpPost]
-        public Guid UploadImage(IFormFile file)
+        public Guid UploadImage(IFormFile file, string password)
         {
-
             var fileName = ContentDispositionHeaderValue
                 .Parse(file.ContentDisposition)
                 .FileName
                 .Trim('"'); // FileName returns "fileName.ext"(with double quotes) in beta 3
 
-            var dataAcces = new data_access.ImagesMongo();
+            var dataAcces = new data_access.ImagesMongo(password);
             dataAcces.Save(file.OpenReadStream(), fileName);
             return Guid.NewGuid();
         }
