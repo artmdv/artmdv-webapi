@@ -5,6 +5,9 @@
   "tags": [ "" ],
   "projectUrl": "",
   "licenseUrl": "",
+  "dependencies": {
+    "contracts": "1.0.0-*"
+  },
 
   "frameworks": {
     "net451": {

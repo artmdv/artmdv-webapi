@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.IO;
+using System.Threading.Tasks;
 using artmdv_webapi.Attributes;
 using artmdv_webapi.Models;
 using Microsoft.AspNet.Authorization;
@@ -8,6 +9,11 @@ using Microsoft.AspNet.Cors;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Mvc;
 using Microsoft.Net.Http.Headers;
+using MongoDB.Bson;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using contracts;
+using data_access;
 
 namespace artmdv_webapi.Controllers
 {
@@ -15,67 +21,74 @@ namespace artmdv_webapi.Controllers
     [EnableCors("default")]
     public class AstrophotosController : Controller
     {
-        [AllowAnonymous]
         [HttpGet]
-        public IEnumerable<AstroImage> Get()
+        [Route("Image/{id}", Name="ImageRoute")]
+        public ActionResult Image(string id)
+        {
+            var dataAcces = new ImagesMongo();
+            Image image = dataAcces.Get(id);
+            image.Content.Position = 0;
+            return new FileStreamResult(image.Content, "image/jpeg");
+        }
+        
+        [HttpGet]
+        public async Task<IEnumerable<AstroImage>> Get()
         {
             var list = new List<AstroImage>();
-            list.Add(new AstroImage()
+            var dataAcces = new ImagesMongo();
+            var images = await dataAcces.GetAll();
+            foreach (Image image in images)
             {
-                Image = "images/ap/NGC6995.jpg",
-                Thumbnail = "images/ap/NGC6995_thumb.jpg",
-                Title = "NGC 6995 Eastern Veil nebula"
-            });
-            list.Add(new AstroImage()
-            {
-                Image = "images/ap/M16.jpg",
-                Thumbnail = "images/ap/M16_thumb.jpg",
-                Title = "M16 Eagle nebula"
-            });
-            list.Add(new AstroImage()
-            {
-                Image = "images/ap/M51.jpg",
-                Thumbnail = "images/ap/M51_thumb.jpg",
-                Title = "M51 Whirlpool galaxy"
-            });
-            list.Add(new AstroImage()
-            {
-                Image = "images/ap/M57.jpg",
-                Thumbnail = "images/ap/M57_thumb.jpg",
-                Title = "M57 Ring nebula"
-            });
-            list.Add(new AstroImage()
-            {
-                Image = "images/ap/M81_M82.jpg",
-                Thumbnail = "images/ap/M81_M82_thumb.jpg",
-                Title = "M81 Bode's galaxy and M82 Cigar galaxy"
-            });
-            list.Add(new AstroImage()
-            {
-                Image = "images/ap/milky-way.jpg",
-                Thumbnail = "images/ap/milky-way_thumb.jpg",
-                Title = "Milky Way"
-            });
-            list.Add(new AstroImage()
-            {
-                Image = "images/ap/NGC7331.jpg",
-                Thumbnail = "images/ap/NGC7331_thumb.jpg",
-                Title = "NGC 7331 and friends"
-            });
+                list.Add(new AstroImage()
+                {
+                    Id = image.Id,
+                    Image = Url.Link("ImageRoute", new { id = image.Id}),
+                    Thumbnail = Url.Link("ImageRoute", new { id = image.Id }),
+                    Title = image.Filename
+                });
+            }
             return list;
         }
         
-        [PasswordAuthorize, HttpPost]
-        public Guid UploadImage(IFormFile file)
+        [HttpPost]
+        public string UploadImage(IFormFile file, string password)
         {
-            var fileName = ContentDispositionHeaderValue
-                .Parse(file.ContentDisposition)
-                .FileName
-                .Trim('"'); // FileName returns "fileName.ext"(with double quotes) in beta 3
+            if (CheckPassword(password))
+            {
+                if (file.Length > 0)
+                {
+                    var fileName = ContentDispositionHeaderValue
+                        .Parse(file.ContentDisposition)
+                        .FileName
+                        .Trim('"'); // FileName returns "fileName.ext"(with double quotes) in beta 3
 
-            var dataAcces = new data_access.ImagesMongo();
-            dataAcces.Save(file.OpenReadStream(), fileName);
-            return Guid.NewGuid();
+                    var dataAcces = new ImagesMongo();
+                    return dataAcces.Save(file.OpenReadStream(), fileName);
+                }
+            }
+            return string.Empty;
+        }
+
+        [HttpDelete]
+        public void DeleteImage(string id, string password)
+        {
+            if (CheckPassword(password))
+            {
+                var dataAcces = new ImagesMongo();
+                dataAcces.Delete(id);
+            }
+        }
+
+        private static bool CheckPassword(string password)
+        {
+            var fs = new FileStream("config.json", FileMode.Open, FileAccess.Read);
+            JObject config = null;
+            using (StreamReader streamReader = new StreamReader(fs))
+            using (JsonTextReader reader = new JsonTextReader(streamReader))
+            {
+                config = (JObject) JToken.ReadFrom(reader);
+            }
+            return config?.GetValue("password").ToString() == password;
         }
     }
 }

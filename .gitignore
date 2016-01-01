@@ -8,3 +8,5 @@ packages/*
 *.crunch*
 _NCrunch_artmdv-webapi/*
 **/project.lock.json
+config.json
+test.html

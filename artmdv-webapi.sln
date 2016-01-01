@@ -14,6 +14,8 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "artmdv-webapi", "src\artmdv
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "data-access", "src\data-access\data-access.xproj", "{3E33849F-73D5-49FF-BB14-00308A7F02A8}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "contracts", "src\contracts\contracts.xproj", "{D1007C85-B18C-4516-AEF4-6BB181412894}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,6 +30,10 @@ Global
 		{3E33849F-73D5-49FF-BB14-00308A7F02A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3E33849F-73D5-49FF-BB14-00308A7F02A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3E33849F-73D5-49FF-BB14-00308A7F02A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1007C85-B18C-4516-AEF4-6BB181412894}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1007C85-B18C-4516-AEF4-6BB181412894}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1007C85-B18C-4516-AEF4-6BB181412894}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1007C85-B18C-4516-AEF4-6BB181412894}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -35,5 +41,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{FCB784C3-79E5-4BBC-AF2D-CBA688972F0F} = {4C293149-C889-4256-9CCE-7C3C87DF2AD3}
 		{3E33849F-73D5-49FF-BB14-00308A7F02A8} = {4C293149-C889-4256-9CCE-7C3C87DF2AD3}
+		{D1007C85-B18C-4516-AEF4-6BB181412894} = {4C293149-C889-4256-9CCE-7C3C87DF2AD3}
 	EndGlobalSection
 EndGlobal
