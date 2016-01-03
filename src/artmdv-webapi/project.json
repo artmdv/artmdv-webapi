@@ -1,4 +1,4 @@
-﻿{
+{
   "webroot": "wwwroot",
   "version": "1.0.0-*",
 
@@ -9,8 +9,13 @@
     "Microsoft.AspNet.IISPlatformHandler": "1.0.0-rc1-final",
     "Microsoft.AspNet.StaticFiles": "1.0.0-rc1-final",
     "Microsoft.AspNet.Mvc.WebApiCompatShim": "6.0.0-rc1-final",
+    "Microsoft.AspNet.Mvc.Cors": "6.0.0-rc1-final",
     "Microsoft.AspNet.Cors": "6.0.0-rc1-final",
-    "Microsoft.AspNet.Mvc.Cors": "6.0.0-rc1-final"
+    "data-access": "1.0.0-*",
+    "contracts": "1.0.0-*",
+    "Mvc2": "2.0.1",
+    "Microsoft.AspNet.WebApi.Core": "5.2.3",
+    "Newtonsoft.Json": "8.0.1"
   },
 
   "commands": {
@@ -19,11 +24,10 @@
 
   "frameworks": {
     "dnx451": {
-      "dependencies": {
-        "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0-rc1-final"
-      }
-    },
-    "dnxcore50": { }
+        "dependencies": {
+            "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0-rc1-final"
+        }
+    }
   },
 
   "exclude": [

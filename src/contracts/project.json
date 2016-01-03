@@ -1,0 +1,12 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "contracts Class Library",
+  "authors": [ "artur" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "frameworks": {
+    "net451": { }
+  }
+}

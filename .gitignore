@@ -1,12 +1,12 @@
 # Created by .ignore support plugin (hsz.mobi)
-
-node_modules/
-bower_components/
-.idea/
-report/*
-coverage/*
-build/*
 *.ncrunch*
 *vs/*
 *.xproj.user
-*/project.lock.json
+packages/*
+**/obj/*
+**/bin/*
+*.crunch*
+_NCrunch_artmdv-webapi/*
+**/project.lock.json
+config.json
+test.html
