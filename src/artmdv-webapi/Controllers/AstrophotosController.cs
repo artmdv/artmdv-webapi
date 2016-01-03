@@ -30,6 +30,17 @@ namespace artmdv_webapi.Controllers
             image.Content.Position = 0;
             return new FileStreamResult(image.Content, "image/jpeg");
         }
+
+        [HttpGet]
+        [Route("Thumb/{id}", Name= "ThumbRoute")]
+        public ActionResult Thumb(string id)
+        {
+            var dataAcces = new ImagesMongo();
+            Image image = dataAcces.Get(id);
+            image.Content.Position = 0;
+            
+            return new FileStreamResult(image.Content, "image/jpeg");
+        }
         
         [HttpGet]
         public async Task<IEnumerable<AstroImage>> Get()
@@ -43,7 +54,7 @@ namespace artmdv_webapi.Controllers
                 {
                     Id = image.Id,
                     Image = Url.Link("ImageRoute", new { id = image.Id}),
-                    Thumbnail = Url.Link("ImageRoute", new { id = image.Id }),
+                    Thumbnail = Url.Link("ThumbRoute", new { id = image.Id }),
                     Title = image.Filename
                 });
             }
