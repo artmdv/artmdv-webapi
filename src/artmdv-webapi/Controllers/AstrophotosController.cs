@@ -14,6 +14,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using contracts;
 using data_access;
+using ImageResizer;
 
 namespace artmdv_webapi.Controllers
 {
@@ -38,7 +39,12 @@ namespace artmdv_webapi.Controllers
             var dataAcces = new ImagesMongo();
             Image image = dataAcces.Get(id);
             image.Content.Position = 0;
-            
+            var config = new ImageResizer.Configuration.Config();
+            var resizedStream = new MemoryStream();
+            var job = new ImageJob(image.Content, resizedStream, new Instructions("width=400"));
+            config.Build(job);
+            resizedStream.Position = 0;
+            image.Content = resizedStream;
             return new FileStreamResult(image.Content, "image/jpeg");
         }
         
