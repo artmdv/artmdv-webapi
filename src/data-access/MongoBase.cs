@@ -13,27 +13,27 @@ namespace data_access
 {
     public class MongoBase
     {
-        private MongoClient _client;
-        private IMongoDatabase _database;
-        private IMongoCollection<BsonDocument> _collection;
+        protected readonly MongoClient Client;
+        protected readonly IMongoDatabase Database;
+        protected readonly IMongoCollection<BsonDocument> Collection;
 
         internal MongoBase(string collection)
         {
-            _client = new MongoClient("mongodb://localhost:27017");
-            _database = _client.GetDatabase("artmdv");
-            _collection = _database.GetCollection<BsonDocument>(collection);
+            Client = new MongoClient("mongodb://localhost:27017");
+            Database = Client.GetDatabase("artmdv");
+            Collection = Database.GetCollection<BsonDocument>(collection);
         }
 
         protected string UploadFile(Stream fileStream, string filename)
         {
-            var gridFs = new GridFSBucket(_database);
-            gridFs.UploadFromStream(filename, fileStream);
-            return filename;
+            var gridFs = new GridFSBucket(Database);
+            var objectId = gridFs.UploadFromStream(filename, fileStream);
+            return objectId.ToString();
         }
 
         protected Image GetByFileName(string id)
         {
-            var gridFs = new GridFSBucket(_database);
+            var gridFs = new GridFSBucket(Database);
             var builders = Builders<GridFSFileInfo>.Filter;
             var filter = builders.Eq("_id", ObjectId.Parse(id));
             var img = gridFs.Find(filter);
@@ -48,13 +48,13 @@ namespace data_access
 
         protected void Delete(ObjectId id)
         {
-            var gridFs = new GridFSBucket(_database);
+            var gridFs = new GridFSBucket(Database);
             gridFs.Delete(id);
         }
 
         protected virtual async Task<IList<Image>> GetAll()
         {
-            var gridFs = new GridFSBucket(_database);
+            var gridFs = new GridFSBucket(Database);
 
             var results = new List<Image>();
 

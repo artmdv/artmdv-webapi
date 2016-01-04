@@ -49,26 +49,34 @@ namespace artmdv_webapi.Controllers
         }
         
         [HttpGet]
-        public async Task<IEnumerable<AstroImage>> Get()
+        public IEnumerable<AstroImage> Get()
         {
-            var list = new List<AstroImage>();
             var dataAcces = new ImagesMongo();
-            var images = await dataAcces.GetAll();
-            foreach (Image image in images)
-            {
-                list.Add(new AstroImage()
-                {
-                    Id = image.Id,
-                    Image = Url.Link("ImageRoute", new { id = image.Id}),
-                    Thumbnail = Url.Link("ThumbRoute", new { id = image.Id }),
-                    Title = image.Filename
-                });
-            }
-            return list;
+            var images = dataAcces.GetAll();
+            return images;
         }
-        
+
+        [Route("Migrate")]
         [HttpPost]
-        public string UploadImage(IFormFile file, string password)
+        public void Migrate(string id, string title, string description, string password)
+        {
+            if (CheckPassword(password))
+            {
+                var dataAcces = new ImagesMongo();
+                var image = new AstroImage()
+                {
+                    Id = id,
+                    Image = Url.Link("ImageRoute", new { id = id }),
+                    Thumbnail = Url.Link("ThumbRoute", new { id = id }),
+                    Title = title,
+                    Description = description
+                };
+                dataAcces.Create(image);
+            }
+        }
+
+        [HttpPost]
+        public AstroImage UploadImage(IFormFile file, string title, string description, string password)
         {
             if (CheckPassword(password))
             {
@@ -80,10 +88,20 @@ namespace artmdv_webapi.Controllers
                         .Trim('"'); // FileName returns "fileName.ext"(with double quotes) in beta 3
 
                     var dataAcces = new ImagesMongo();
-                    return dataAcces.Save(file.OpenReadStream(), fileName);
+                    var imageId = dataAcces.SaveImage(file.OpenReadStream(), fileName);
+                    var image = new AstroImage()
+                    {
+                        Id = imageId,
+                        Image = Url.Link("ImageRoute", new {id = imageId}),
+                        Thumbnail = Url.Link("ThumbRoute", new {id = imageId}),
+                        Title = title,
+                        Description = description
+                    };
+                    dataAcces.Create(image);
+                    return image;
                 }
             }
-            return string.Empty;
+            return null;
         }
 
         [HttpDelete]

@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using artmdv_webapi.Models;
 using contracts;
 using MongoDB.Bson;
+using MongoDB.Driver;
 
 namespace data_access
 {
@@ -13,14 +15,22 @@ namespace data_access
         {
         }
 
+        public string Create(AstroImage image)
+        {
+            var document = image.ToBsonDocument();
+            Collection.InsertOne(document);
+            return image.Id;
+        }
+
         public Image Get(string id)
         {
             return GetByFileName(id);
         }
 
-        public new async Task<IList<Image>> GetAll()
+        public new IList<AstroImage> GetAll()
         {
-            return await base.GetAll();
+            var images = Collection.Find(FilterDefinition<BsonDocument>.Empty).As<AstroImage>().ToList();
+            return images;
         }
 
         public void Delete(string id)
@@ -28,7 +38,7 @@ namespace data_access
             base.Delete(ObjectId.Parse(id));
         }
 
-        public string Save(Stream fileStream, string filename)
+        public string SaveImage(Stream fileStream, string filename)
         {
             return UploadFile(fileStream, filename);
         }
