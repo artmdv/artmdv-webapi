@@ -15,5 +15,6 @@ namespace data_access
         Image Get(string id);
         IList<AstroImage> GetAll();
         void Delete(string id);
+        void DeleteImage(string id);
     }
 }

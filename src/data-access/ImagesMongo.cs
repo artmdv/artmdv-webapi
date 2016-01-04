@@ -35,6 +35,11 @@ namespace data_access
 
         public void Delete(string id)
         {
+            Collection.DeleteOne(new {_id = id}.ToBsonDocument());
+        }
+
+        public void DeleteImage(string id)
+        {
             base.Delete(ObjectId.Parse(id));
         }
 

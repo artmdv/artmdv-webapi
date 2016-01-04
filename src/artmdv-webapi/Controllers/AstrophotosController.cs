@@ -110,6 +110,7 @@ namespace artmdv_webapi.Controllers
             if (CheckPassword(password))
             {
                 var dataAcces = new ImagesMongo();
+                dataAcces.DeleteImage(id);
                 dataAcces.Delete(id);
             }
         }
