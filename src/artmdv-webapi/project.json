@@ -15,7 +15,9 @@
     "contracts": "1.0.0-*",
     "Mvc2": "2.0.1",
     "Microsoft.AspNet.WebApi.Core": "5.2.3",
-    "Newtonsoft.Json": "8.0.1"
+    "Newtonsoft.Json": "8.0.1",
+    "MongoDB.Driver": "2.2.0",
+    "ImageResizer": "4.0.4"
   },
 
   "commands": {
@@ -24,9 +26,9 @@
 
   "frameworks": {
     "dnx451": {
-        "dependencies": {
-            "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0-rc1-final"
-        }
+      "dependencies": {
+        "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0-rc1-final"
+      }
     }
   },
 

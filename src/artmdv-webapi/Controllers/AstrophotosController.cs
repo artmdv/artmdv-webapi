@@ -14,6 +14,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using contracts;
 using data_access;
+using ImageResizer;
 
 namespace artmdv_webapi.Controllers
 {
@@ -30,6 +31,22 @@ namespace artmdv_webapi.Controllers
             image.Content.Position = 0;
             return new FileStreamResult(image.Content, "image/jpeg");
         }
+
+        [HttpGet]
+        [Route("Thumb/{id}", Name= "ThumbRoute")]
+        public ActionResult Thumb(string id)
+        {
+            var dataAcces = new ImagesMongo();
+            Image image = dataAcces.Get(id);
+            image.Content.Position = 0;
+            var config = new ImageResizer.Configuration.Config();
+            var resizedStream = new MemoryStream();
+            var job = new ImageJob(image.Content, resizedStream, new Instructions("width=400"));
+            config.Build(job);
+            resizedStream.Position = 0;
+            image.Content = resizedStream;
+            return new FileStreamResult(image.Content, "image/jpeg");
+        }
         
         [HttpGet]
         public async Task<IEnumerable<AstroImage>> Get()
@@ -43,7 +60,7 @@ namespace artmdv_webapi.Controllers
                 {
                     Id = image.Id,
                     Image = Url.Link("ImageRoute", new { id = image.Id}),
-                    Thumbnail = Url.Link("ImageRoute", new { id = image.Id }),
+                    Thumbnail = Url.Link("ThumbRoute", new { id = image.Id }),
                     Title = image.Filename
                 });
             }
