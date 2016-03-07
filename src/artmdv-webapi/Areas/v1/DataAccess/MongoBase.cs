@@ -2,12 +2,12 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using artmdv_webapi.Models;
+using artmdv_webapi.Areas.v1.Models;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
 
-namespace artmdv_webapi.DataAccess
+namespace artmdv_webapi.Areas.v1.DataAccess
 {
     public class MongoBase
     {

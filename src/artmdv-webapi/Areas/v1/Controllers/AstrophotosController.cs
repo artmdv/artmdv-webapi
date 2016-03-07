@@ -1,18 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using artmdv_webapi.DataAccess;
-using artmdv_webapi.Models;
+using artmdv_webapi.Areas.v1.DataAccess;
+using artmdv_webapi.Areas.v1.Models;
+using ImageResizer;
 using Microsoft.AspNet.Cors;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Mvc;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using ImageResizer;
 
-namespace artmdv_webapi.Controllers
+namespace artmdv_webapi.Areas.v1.Controllers
 {
-    [Route("[controller]")]
+    [Area("v1")]
+    [Route("Astrophotos")]
     [EnableCors("default")]
     public class AstrophotosController : Controller
     {

@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace artmdv_webapi.Models
+namespace artmdv_webapi.Areas.v1.Models
 {
     public class Image
     {

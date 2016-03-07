@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using artmdv_webapi.Models;
+using artmdv_webapi.Areas.v1.Models;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace artmdv_webapi.DataAccess
+namespace artmdv_webapi.Areas.v1.DataAccess
 {
     public class ImagesMongo : MongoBase, IImagesDataAccess
     {
