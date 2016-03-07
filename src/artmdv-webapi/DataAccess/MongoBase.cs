@@ -1,15 +1,13 @@
-﻿using System;
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using contracts;
+using artmdv_webapi.Models;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
 
-namespace data_access
+namespace artmdv_webapi.DataAccess
 {
     public class MongoBase
     {

@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 using artmdv_webapi.Models;
-using contracts;
-using MongoDB.Bson;
 
-namespace data_access
+namespace artmdv_webapi.DataAccess
 {
     public interface IImagesDataAccess
     {

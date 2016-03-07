@@ -1,19 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
-using artmdv_webapi.Attributes;
+using artmdv_webapi.DataAccess;
 using artmdv_webapi.Models;
-using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Cors;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Mvc;
 using Microsoft.Net.Http.Headers;
-using MongoDB.Bson;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using contracts;
-using data_access;
 using ImageResizer;
 
 namespace artmdv_webapi.Controllers
@@ -76,7 +70,7 @@ namespace artmdv_webapi.Controllers
         }
 
         [HttpPost]
-        public AstroImage UploadImage(IFormFile file, string title, string description, string password)
+        public dynamic UploadImage(IFormFile file, string title, string description, string password)
         {
             if (CheckPassword(password))
             {
@@ -98,7 +92,7 @@ namespace artmdv_webapi.Controllers
                         Description = description
                     };
                     dataAcces.Create(image);
-                    return image;
+                    return new { Image = image, ForumPost = $"[url={image.Image}][img]{image.Thumbnail}[/img][/url]"};
                 }
             }
             return null;

@@ -11,13 +11,12 @@
     "Microsoft.AspNet.Mvc.WebApiCompatShim": "6.0.0-rc1-final",
     "Microsoft.AspNet.Mvc.Cors": "6.0.0-rc1-final",
     "Microsoft.AspNet.Cors": "6.0.0-rc1-final",
-    "data-access": "1.0.0-*",
-    "contracts": "1.0.0-*",
     "Mvc2": "2.0.1",
     "Microsoft.AspNet.WebApi.Core": "5.2.3",
-    "Newtonsoft.Json": "8.0.1",
-    "MongoDB.Driver": "2.2.0",
-    "ImageResizer": "4.0.4"
+    "MongoDB.Driver": "2.2.3",
+    "MongoDB.Driver.GridFS": "2.2.3",
+    "Newtonsoft.Json": "8.0.2",
+    "ImageResizer": "4.0.5"
   },
 
   "commands": {
