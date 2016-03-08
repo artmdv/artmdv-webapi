@@ -8,6 +8,7 @@ using Microsoft.AspNet.Cors.Infrastructure;
 using Microsoft.AspNet.Hosting;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Mvc.Filters;
+using Microsoft.AspNet.Mvc.Formatters;
 using Microsoft.AspNet.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNet.Mvc.WebApiCompatShim;
@@ -36,10 +37,7 @@ namespace artmdv_webapi
         {
             // Configure the HTTP request pipeline.
             app.UseStaticFiles();
-
-            app.UseDeveloperExceptionPage();
-            app.UseRuntimeInfoPage();
-
+            
             // Add MVC to the request pipeline.
             app.UseMvc(routes =>
             {

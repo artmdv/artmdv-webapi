@@ -20,27 +20,27 @@ namespace artmdv_webapi.Areas.v2.Controllers
     public class ImagesController : Controller
     {
         [HttpPost]
-        public dynamic UploadImage(IFormFile file, string title, string description, string tags, string password)
+        public dynamic UploadImage(ImageUploadDto model)
         {
-            CheckPassword(password);
+            CheckPassword(model?.password);
             
-            if (file.Length > 0)
+            if (model?.file?.Length > 0)
             {
                 var fileName = ContentDispositionHeaderValue
-                    .Parse(file.ContentDisposition)
+                    .Parse(model.file.ContentDisposition)
                     .FileName
                     .Trim('"'); // FileName returns "fileName.ext"(with double quotes) in beta 3
 
                 var dataAcces = new ImageDataAccess();
 
-                var fileStream = file.OpenReadStream();
+                var fileStream = model.file.OpenReadStream();
 
                 var image = new Image
                 {
                     Filename = fileName,
-                    Description = description,
-                    Title = title,
-                    Tags = tags.Split(','),
+                    Description = model.description,
+                    Title = model.title,
+                    Tags = model.tags.Split(','),
                     Thumb = new Thumbnail
                     {
                         Filename = $"thumb_{fileName}"
@@ -137,5 +137,14 @@ namespace artmdv_webapi.Areas.v2.Controllers
             }
 
         }
+    }
+
+    public class ImageUploadDto
+    {
+        public IFormFile file { get; set; }
+        public string title { get; set; }
+        public string description { get; set; }
+        public string tags { get; set; }
+        public string password { get; set; }
     }
 }
