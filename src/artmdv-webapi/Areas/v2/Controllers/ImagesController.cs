@@ -49,10 +49,30 @@ namespace artmdv_webapi.Areas.v2.Controllers
 
                 var thumb = GenerateThumbnail(fileStream.CopyToMemoryStream());
 
-                var imageId = dataAcces.Save(image, fileStream, thumb);
+                var imageId = dataAcces.Create(image, fileStream, thumb);
 
                 return GetImage(imageId.ToString());
             }
+            return null;
+        }
+
+        [HttpPut]
+        public dynamic UpdateImage([FromBody]ImageUpdateDto imageVm)
+        {
+            CheckPassword(imageVm?.password);
+            var dataAcces = new ImageDataAccess();
+            if (imageVm?.image != null)
+            {
+                var image = imageVm.image.ToImage();
+                return dataAcces.Update(image);
+            }
+            return null;
+        }
+
+        [HttpDelete]
+        public dynamic DeleteImage(string password, string id)
+        {
+            CheckPassword(password);
             return null;
         }
 
@@ -137,6 +157,12 @@ namespace artmdv_webapi.Areas.v2.Controllers
             }
 
         }
+    }
+
+    public class ImageUpdateDto
+    {
+        public ImageViewModel image { get; set; }
+        public string password { get; set; }
     }
 
     public class ImageUploadDto

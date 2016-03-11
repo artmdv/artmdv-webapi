@@ -24,7 +24,7 @@ namespace artmdv_webapi.Areas.v2.DataAccess
             GridFs = new GridFSBucket(Database);
         }
 
-        public ObjectId Save(Image image, Stream imagecontent, Stream thumbContent)
+        public string Create(Image image, Stream imagecontent, Stream thumbContent)
         {
             imagecontent.Position = 0;
             var imageId = GridFs.UploadFromStream(image.Filename, imagecontent);
@@ -34,7 +34,15 @@ namespace artmdv_webapi.Areas.v2.DataAccess
             image.Thumb.ContentId = thumbId.ToString();
             image.Id = ObjectId.GenerateNewId(DateTime.Now);
             Collection.InsertOne(image);
-            return image.Id;
+            return image.Id.ToString();
+        }
+
+        public Image Update(Image image)
+        {
+            var builder = Builders<Image>.Filter;
+            var filter = builder.Eq("_id", image.Id);
+            Collection.ReplaceOne(filter, image);
+            return image;
         }
 
         public Image Get(string id)
