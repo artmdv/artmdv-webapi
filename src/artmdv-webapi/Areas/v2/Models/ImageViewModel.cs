@@ -17,6 +17,7 @@ namespace artmdv_webapi.Areas.v2.Models
         public string Title { get; set; }
         public Thumbnail Thumb { get; set; }
         public string[] Tags { get; set; }
+        public string Date { get; set; }
 
         public Image ToImage()
         {
@@ -28,7 +29,8 @@ namespace artmdv_webapi.Areas.v2.Models
                 Description = Description,
                 Title = Title,
                 Thumb = Thumb,
-                Tags = Tags
+                Tags = Tags,
+                Date = Date
             };
             return image;
         }

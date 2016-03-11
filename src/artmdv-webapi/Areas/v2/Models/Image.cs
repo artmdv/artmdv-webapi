@@ -1,4 +1,5 @@
-﻿using artmdv_webapi.Areas.v1.Models;
+﻿using System;
+using artmdv_webapi.Areas.v1.Models;
 using MongoDB.Bson;
 
 namespace artmdv_webapi.Areas.v2.Models
@@ -13,5 +14,7 @@ namespace artmdv_webapi.Areas.v2.Models
         public string Title { get; set; }
         public Thumbnail Thumb { get; set; }
         public string[] Tags { get; set; }
+
+        public string Date { get; set; }
     }
 }

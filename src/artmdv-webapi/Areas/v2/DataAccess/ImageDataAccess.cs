@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using artmdv_webapi.Areas.v2.Models;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
@@ -72,9 +73,13 @@ namespace artmdv_webapi.Areas.v2.DataAccess
             return content;
         }
 
-        public List<Image> GetAllByTag(string tag)
+        public async Task<List<Image>> GetAllByTag(string tag)
         {
-            return Collection.Find(x=>x.Tags.Contains(tag)).ToListAsync().Result;
+            if (string.IsNullOrWhiteSpace(tag))
+            {
+                return await Collection.Find(x=>x.Tags != null).ToListAsync();
+            }
+            return await Collection.Find(x=>x.Tags.Any(y=>tag.Split(',').Contains(y))).ToListAsync();
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 using artmdv_webapi.Areas.v2.DataAccess;
 using artmdv_webapi.Areas.v2.Models;
 using ImageResizer;
@@ -41,6 +43,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
                     Description = model.description,
                     Title = model.title,
                     Tags = model.tags.Split(','),
+                    Date = model.date,
                     Thumb = new Thumbnail
                     {
                         Filename = $"thumb_{fileName}"
@@ -102,16 +105,15 @@ namespace artmdv_webapi.Areas.v2.Controllers
         }
 
         [HttpGet]
-        public dynamic Getall(string tag=null)
+        public async Task<dynamic> Getall(string tag=null)
         {
+            tag = tag ?? string.Empty;
             var dataAcces = new ImageDataAccess();
-            var images = dataAcces.GetAllByTag(tag);
-            var decoratedImages = new List<dynamic>();
-            foreach (var image in images)
-            {
-                decoratedImages.Add(DecorateImage(image));
-            }
-            return decoratedImages;
+            var images = await dataAcces.GetAllByTag(tag);
+
+            images = images.OrderByDescending(x => x.Date).ToList();
+
+            return images.Select(image => DecorateImage(image)).ToList();
         }
 
         [HttpGet]
@@ -171,6 +173,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
         public string title { get; set; }
         public string description { get; set; }
         public string tags { get; set; }
+        public string date { get; set; }
         public string password { get; set; }
     }
 }
