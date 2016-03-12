@@ -81,5 +81,17 @@ namespace artmdv_webapi.Areas.v2.DataAccess
             }
             return await Collection.Find(x=>x.Tags.Any(y=>tag.Split(',').Contains(y))).ToListAsync();
         }
+
+        public void Delete(string id)
+        {
+            var image = Get(id);
+
+            GridFs.Delete(ObjectId.Parse(image.ContentId));
+            GridFs.Delete(ObjectId.Parse(image.Thumb.ContentId));
+
+            var builder = Builders<Image>.Filter;
+            var filter = builder.Eq("_id", ObjectId.Parse(id));
+            Collection.DeleteOne(filter);
+        }
     }
 }

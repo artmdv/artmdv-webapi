@@ -73,9 +73,12 @@ namespace artmdv_webapi.Areas.v2.Controllers
         }
 
         [HttpDelete]
+        [Route("{id}/{password}")]
         public dynamic DeleteImage(string password, string id)
         {
             CheckPassword(password);
+            var dataAcces = new ImageDataAccess();
+            dataAcces.Delete(id);
             return null;
         }
 
