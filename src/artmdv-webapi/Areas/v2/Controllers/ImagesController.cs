@@ -110,6 +110,10 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [HttpGet]
         public async Task<dynamic> Getall(string tag=null)
         {
+            if (tag == "all")
+            {
+                tag = string.Empty;
+            }
             tag = tag ?? string.Empty;
             var dataAcces = new ImageDataAccess();
             var images = await dataAcces.GetAllByTag(tag);
