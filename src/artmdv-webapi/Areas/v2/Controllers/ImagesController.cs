@@ -96,7 +96,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [Route("{id}")]
         public dynamic GetImage(string id)
         {
-            GraphiteClient.Send("Get.Image", 1);
+            GraphiteClient.Send("Get.Image", 1, DateTime.Now);
             var stopwatch = new Stopwatch();
             stopwatch.Start();
             var dataAcces = new ImageDataAccess();
@@ -104,7 +104,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
             
             var result = DecorateImage(image);
             stopwatch.Stop();
-            GraphiteClient.Send("Get.Image.Elapsed", (int) stopwatch.ElapsedMilliseconds);
+            GraphiteClient.Send("Get.Image.ElapsedMs", (int) stopwatch.ElapsedMilliseconds, DateTime.Now);
             return result;
         }
 
