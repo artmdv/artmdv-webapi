@@ -96,7 +96,6 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [Route("{id}")]
         public dynamic GetImage(string id)
         {
-            GraphiteClient.Send("Get.Image", 1, DateTime.Now);
             var stopwatch = new Stopwatch();
             stopwatch.Start();
             var dataAcces = new ImageDataAccess();
@@ -126,6 +125,8 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [HttpGet]
         public async Task<dynamic> Getall(string tag=null)
         {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
             if (tag == "all")
             {
                 tag = string.Empty;
@@ -136,7 +137,10 @@ namespace artmdv_webapi.Areas.v2.Controllers
 
             images = images.OrderByDescending(x => x.Date).ToList();
 
-            return images.Select(image => DecorateImage(image)).ToList();
+            var result = images.Select(image => DecorateImage(image)).ToList();
+            stopwatch.Stop();
+            GraphiteClient.Send("Get.Images.ElapsedMs", (int)stopwatch.ElapsedMilliseconds, DateTime.Now);
+            return result;
         }
 
         [HttpGet]
