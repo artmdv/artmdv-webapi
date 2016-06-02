@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using artmdv_webapi.Areas.v2.DataAccess;
 using artmdv_webapi.Areas.v2.Models;
+using Graphite;
 using ImageResizer;
 using ImageResizer.ExtensionMethods;
 using Microsoft.AspNet.Cors;
@@ -21,6 +24,13 @@ namespace artmdv_webapi.Areas.v2.Controllers
     [EnableCors("default")]
     public class ImagesController : Controller
     {
+        private GraphiteUdpClient GraphiteClient { get; set; }
+
+        public ImagesController()
+        {
+            GraphiteClient = new GraphiteUdpClient("localhost", 2003, "api");
+        }
+
         [HttpPost]
         public dynamic UploadImage(ImageUploadDto model)
         {
@@ -86,10 +96,16 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [Route("{id}")]
         public dynamic GetImage(string id)
         {
+            GraphiteClient.Send("Get.Image", 1);
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
             var dataAcces = new ImageDataAccess();
             var image = dataAcces.Get(id);
             
-            return DecorateImage(image);
+            var result = DecorateImage(image);
+            stopwatch.Stop();
+            GraphiteClient.Send("Get.Image.Elapsed", (int) stopwatch.ElapsedMilliseconds);
+            return result;
         }
 
         private dynamic DecorateImage(Image image)
