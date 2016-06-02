@@ -24,11 +24,11 @@ namespace artmdv_webapi.Areas.v2.Controllers
     [EnableCors("default")]
     public class ImagesController : Controller
     {
-        private GraphiteUdpClient GraphiteClient { get; set; }
+        private GraphiteTcpClient GraphiteClient { get; set; }
 
         public ImagesController()
         {
-            GraphiteClient = new GraphiteUdpClient("127.0.0.1", 2003, "api");
+            GraphiteClient = new GraphiteTcpClient("127.0.0.1", 2003, "api");
         }
 
         [HttpPost]
