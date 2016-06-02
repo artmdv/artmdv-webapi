@@ -28,7 +28,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
 
         public ImagesController()
         {
-            GraphiteClient = new GraphiteUdpClient("localhost", 2003, "api");
+            GraphiteClient = new GraphiteUdpClient("127.0.0.1", 2003, "api");
         }
 
         [HttpPost]
