@@ -126,7 +126,8 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [HttpGet]
         public async Task<dynamic> Getall(string tag=null)
         {
-            GraphiteClient.Send($"Get.Images.{tag}.Count", 1, DateTime.Now);
+            GraphiteClient.Send($"Get.Images.{tag ?? "All"}.Count", 1, DateTime.Now);
+            GraphiteClient.Send($"Get.Images.Count", 1, DateTime.Now);
             var stopwatch = new Stopwatch();
             stopwatch.Start();
             if (tag == "all")
