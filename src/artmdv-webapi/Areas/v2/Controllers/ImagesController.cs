@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using artmdv_webapi.Areas.v2.DataAccess;
 using artmdv_webapi.Areas.v2.Models;
-using Graphite;
 using ImageResizer;
 using ImageResizer.ExtensionMethods;
 using Microsoft.AspNet.Cors;
@@ -16,6 +12,7 @@ using Microsoft.AspNet.Mvc;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using StatsdClient;
 
 namespace artmdv_webapi.Areas.v2.Controllers
 {
@@ -24,11 +21,11 @@ namespace artmdv_webapi.Areas.v2.Controllers
     [EnableCors("default")]
     public class ImagesController : Controller
     {
-        private GraphiteTcpClient GraphiteClient { get; set; }
+        private Statsd StatsDClient { get; set; }
 
         public ImagesController()
         {
-            GraphiteClient = new GraphiteTcpClient("127.0.0.1", 2003, "api");
+            StatsDClient = new Statsd("127.0.0.1", 8125);
         }
 
         [HttpPost]
@@ -96,16 +93,14 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [Route("{id}")]
         public dynamic GetImage(string id)
         {
-            GraphiteClient.Send("Get.Image.Count", 1);
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-            var dataAcces = new ImageDataAccess();
-            var image = dataAcces.Get(id);
-            
-            var result = DecorateImage(image);
-            stopwatch.Stop();
-            GraphiteClient.Send("Get.Image.ElapsedMs", (int) stopwatch.ElapsedMilliseconds);
-            return result;
+            StatsDClient.LogCount("Get.Image.Count");
+            using (StatsDClient.LogTiming("Get.Image.ElapsedMs"))
+            {
+                var dataAcces = new ImageDataAccess();
+                var image = dataAcces.Get(id);
+
+                return DecorateImage(image);
+            }
         }
 
         private dynamic DecorateImage(Image image)
@@ -126,53 +121,47 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [HttpGet]
         public async Task<dynamic> Getall(string tag=null)
         {
-            GraphiteClient.Send($"Get.Images.{tag ?? "All"}.Count", 1);
-            GraphiteClient.Send($"Get.Images.Count", 1);
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-            if (tag == "all")
+            StatsDClient.LogCount($"Get.Images.{tag ?? "All"}.Count");
+            StatsDClient.LogCount("Get.Images.Count");
+            using (StatsDClient.LogTiming("Get.Images.ElapsedMs"))
             {
-                tag = string.Empty;
+                if (tag == "all")
+                {
+                    tag = string.Empty;
+                }
+                tag = tag ?? string.Empty;
+                var dataAcces = new ImageDataAccess();
+                var images = await dataAcces.GetAllByTag(tag);
+
+                images = images.OrderByDescending(x => x.Date).ToList();
+
+                return images.Select(image => DecorateImage(image)).ToList();
             }
-            tag = tag ?? string.Empty;
-            var dataAcces = new ImageDataAccess();
-            var images = await dataAcces.GetAllByTag(tag);
-
-            images = images.OrderByDescending(x => x.Date).ToList();
-
-            var result = images.Select(image => DecorateImage(image)).ToList();
-            stopwatch.Stop();
-            GraphiteClient.Send("Get.Images.ElapsedMs", (int)stopwatch.ElapsedMilliseconds);
-            return result;
         }
 
         [HttpGet]
         [Route("{id}/Content", Name = "ImageContentRoute")]
         public ActionResult GetImageContent(string id)
         {
-            GraphiteClient.Send("Get.Image.Content.Count", 1);
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-            var dataAcces = new ImageDataAccess();
-            var image = dataAcces.GetImageContent(id);
-            var result = new FileStreamResult(image, "image/jpeg");
-            stopwatch.Stop();
-            GraphiteClient.Send("Get.Image.Content.ElapsedMs", (int)stopwatch.ElapsedMilliseconds);
-            return result;
+            StatsDClient.LogCount("Get.Images.Content.Count");
+            using (StatsDClient.LogTiming("Get.Image.Content.ElapsedMs"))
+            {
+                var dataAcces = new ImageDataAccess();
+                var image = dataAcces.GetImageContent(id);
+                return new FileStreamResult(image, "image/jpeg");
+            }
         }
 
         [Route("{id}/Thumbnail", Name = "ThumbContentRoute")]
         public ActionResult GetThumb(string id)
         {
-            GraphiteClient.Send("Get.Image.Thumbnail.Count", 1);
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-            var dataAcces = new ImageDataAccess();
-            var image = dataAcces.GetThumbContent(id);
-            var result = new FileStreamResult(image, "image/jpeg");
-            stopwatch.Stop();
-            GraphiteClient.Send("Get.Image.Thumbnail.ElapsedMs", (int)stopwatch.ElapsedMilliseconds);
-            return result;
+            StatsDClient.LogCount("Get.Image.Thumbnail.Count");
+            using (StatsDClient.LogTiming("Get.Image.Thumbnail.ElapsedMs"))
+            {
+                var dataAcces = new ImageDataAccess();
+                var image = dataAcces.GetThumbContent(id);
+                return new FileStreamResult(image, "image/jpeg");
+            }
         }
 
         private Stream GenerateThumbnail(MemoryStream image)
