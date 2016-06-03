@@ -143,7 +143,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [Route("{id}/Content", Name = "ImageContentRoute")]
         public ActionResult GetImageContent(string id)
         {
-            StatsDClient.LogCount("Get.Images.Content.Count");
+            StatsDClient.LogCount("Get.Image.Content.Count");
             using (StatsDClient.LogTiming("Get.Image.Content.ElapsedMs"))
             {
                 var dataAcces = new ImageDataAccess();
