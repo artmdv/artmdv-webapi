@@ -177,14 +177,8 @@ namespace artmdv_webapi.Areas.v2.Controllers
 
         private static void CheckPassword(string password)
         {
-            var fs = new FileStream("config.json", FileMode.Open, FileAccess.Read);
-            JObject config = null;
-            using (StreamReader streamReader = new StreamReader(fs))
-            using (JsonTextReader reader = new JsonTextReader(streamReader))
-            {
-                config = (JObject) JToken.ReadFrom(reader);
-            }
-            if (config?.GetValue("password").ToString() != password)
+            
+            if (Configuration.Get("password") != password)
             {
                 throw new HttpRequestException();
             }
