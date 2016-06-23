@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -13,6 +12,7 @@ using Microsoft.AspNet.Mvc;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using StatsdClient;
 
 namespace artmdv_webapi.Areas.v2.Controllers
 {
@@ -21,6 +21,13 @@ namespace artmdv_webapi.Areas.v2.Controllers
     [EnableCors("default")]
     public class ImagesController : Controller
     {
+        private Statsd StatsDClient { get; set; }
+
+        public ImagesController()
+        {
+            StatsDClient = new Statsd("127.0.0.1", 8125);
+        }
+
         [HttpPost]
         public dynamic UploadImage(ImageUploadDto model)
         {
@@ -86,10 +93,14 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [Route("{id}")]
         public dynamic GetImage(string id)
         {
-            var dataAcces = new ImageDataAccess();
-            var image = dataAcces.Get(id);
-            
-            return DecorateImage(image);
+            StatsDClient.LogCount("Get.Image.Count");
+            using (StatsDClient.LogTiming("Get.Image.ElapsedMs"))
+            {
+                var dataAcces = new ImageDataAccess();
+                var image = dataAcces.Get(id);
+
+                return DecorateImage(image);
+            }
         }
 
         private dynamic DecorateImage(Image image)
@@ -110,34 +121,47 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [HttpGet]
         public async Task<dynamic> Getall(string tag=null)
         {
-            if (tag == "all")
+            StatsDClient.LogCount($"Get.Images.{tag ?? "All"}.Count");
+            StatsDClient.LogCount("Get.Images.Count");
+            using (StatsDClient.LogTiming("Get.Images.ElapsedMs"))
             {
-                tag = string.Empty;
+                if (tag == "all")
+                {
+                    tag = string.Empty;
+                }
+                tag = tag ?? string.Empty;
+                var dataAcces = new ImageDataAccess();
+                var images = await dataAcces.GetAllByTag(tag);
+
+                images = images.OrderByDescending(x => x.Date).ToList();
+
+                return images.Select(image => DecorateImage(image)).ToList();
             }
-            tag = tag ?? string.Empty;
-            var dataAcces = new ImageDataAccess();
-            var images = await dataAcces.GetAllByTag(tag);
-
-            images = images.OrderByDescending(x => x.Date).ToList();
-
-            return images.Select(image => DecorateImage(image)).ToList();
         }
 
         [HttpGet]
         [Route("{id}/Content", Name = "ImageContentRoute")]
         public ActionResult GetImageContent(string id)
         {
-            var dataAcces = new ImageDataAccess();
-            var image = dataAcces.GetImageContent(id);
-            return new FileStreamResult(image, "image/jpeg");
+            StatsDClient.LogCount("Get.Image.Content.Count");
+            using (StatsDClient.LogTiming("Get.Image.Content.ElapsedMs"))
+            {
+                var dataAcces = new ImageDataAccess();
+                var image = dataAcces.GetImageContent(id);
+                return new FileStreamResult(image, "image/jpeg");
+            }
         }
 
         [Route("{id}/Thumbnail", Name = "ThumbContentRoute")]
         public ActionResult GetThumb(string id)
         {
-            var dataAcces = new ImageDataAccess();
-            var image = dataAcces.GetThumbContent(id);
-            return new FileStreamResult(image, "image/jpeg");
+            StatsDClient.LogCount("Get.Image.Thumbnail.Count");
+            using (StatsDClient.LogTiming("Get.Image.Thumbnail.ElapsedMs"))
+            {
+                var dataAcces = new ImageDataAccess();
+                var image = dataAcces.GetThumbContent(id);
+                return new FileStreamResult(image, "image/jpeg");
+            }
         }
 
         private Stream GenerateThumbnail(MemoryStream image)
