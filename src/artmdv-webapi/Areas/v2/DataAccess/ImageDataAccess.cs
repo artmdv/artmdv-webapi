@@ -93,5 +93,11 @@ namespace artmdv_webapi.Areas.v2.DataAccess
             var filter = builder.Eq("_id", ObjectId.Parse(id));
             Collection.DeleteOne(filter);
         }
+
+        public Stream GetAnnotationContent(string id)
+        {
+            var image = Get(id);
+            return GetImageContent(image.Annotation);
+        }
     }
 }

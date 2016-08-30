@@ -3,6 +3,7 @@
     public enum ImageType
     {
         Image,
-        Thumb
+        Thumb,
+        Annotation
     }
 }

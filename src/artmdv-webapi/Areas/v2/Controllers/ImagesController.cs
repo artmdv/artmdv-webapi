@@ -54,7 +54,8 @@ namespace artmdv_webapi.Areas.v2.Controllers
                     Thumb = new Thumbnail
                     {
                         Filename = $"thumb_{fileName}"
-                    }
+                    },
+                    Annotation = model.annotation
                 };
 
                 var thumb = GenerateThumbnail(fileStream.CopyToMemoryStream());
@@ -111,7 +112,8 @@ namespace artmdv_webapi.Areas.v2.Controllers
                 links = new
                 {
                     ImageContent = Url.Link("ImageContentRoute", new { image.Id }),
-                    ThumbnailContent = Url.Link("ThumbContentRoute", new { image.Id })
+                    ThumbnailContent = Url.Link("ThumbContentRoute", new { image.Id }),
+                    AnnotationContent = image.Annotation != null ? Url.Link("AnnotationContentRoute", new { image.Id }) : ""
                 },
                 ForumPost = $"[url={Url.Link("ImageContentRoute", new { image.Id })}][img]{Url.Link("ThumbContentRoute", new { image.Id })}[/img][/url]"
             };
@@ -164,6 +166,18 @@ namespace artmdv_webapi.Areas.v2.Controllers
             }
         }
 
+        [Route("{id}/Annotation", Name = "AnnotationContentRoute")]
+        public ActionResult GetAnnotation(string id)
+        {
+            StatsDClient.LogCount("Get.Image.Annotation.Count");
+            using (StatsDClient.LogTiming("Get.Image.Annotation.ElapsedMs"))
+            {
+                var dataAcces = new ImageDataAccess();
+                var image = dataAcces.GetAnnotationContent(id);
+                return new FileStreamResult(image, "image/jpeg");
+            }
+        }
+
         private Stream GenerateThumbnail(MemoryStream image)
         {
             image.Position = 0;
@@ -205,6 +219,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
         public string description { get; set; }
         public string tags { get; set; }
         public string date { get; set; }
+        public string annotation { get; set; }
         public string password { get; set; }
     }
 }

@@ -16,6 +16,7 @@ namespace artmdv_webapi.Areas.v2.Models
         public string Description { get; set; }
         public string Title { get; set; }
         public Thumbnail Thumb { get; set; }
+        public string Annotation { get; set; }
         public string[] Tags { get; set; }
         public string Date { get; set; }
 
@@ -30,7 +31,8 @@ namespace artmdv_webapi.Areas.v2.Models
                 Title = Title,
                 Thumb = Thumb,
                 Tags = Tags,
-                Date = Date
+                Date = Date,
+                Annotation = Annotation
             };
             return image;
         }
