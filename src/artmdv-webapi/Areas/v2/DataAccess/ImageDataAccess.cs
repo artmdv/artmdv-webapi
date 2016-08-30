@@ -51,9 +51,7 @@ namespace artmdv_webapi.Areas.v2.DataAccess
             image.Thumb.ContentId = thumbId.ToString();
             image.Id = ObjectId.GenerateNewId(DateTime.Now);
             Collection.InsertOne(image);
-
-            Directory.CreateDirectory(ImageDirectory);
-
+            
             using (var fileStream = File.Create($"{ImageDirectory}/{image.Id}{Path.GetExtension(image.Filename)}"))
             {
                 imagecontent.Position = 0;
