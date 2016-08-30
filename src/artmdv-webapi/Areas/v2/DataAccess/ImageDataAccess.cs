@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using artmdv_webapi.Areas.v2.Models;
@@ -10,6 +11,8 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
 using Microsoft.AspNet.Mvc;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace artmdv_webapi.Areas.v2.DataAccess
 {
@@ -19,7 +22,7 @@ namespace artmdv_webapi.Areas.v2.DataAccess
         public IMongoDatabase Database { get; set; }
         private IMongoCollection<Image> Collection { get; set; }
 
-        private const string ImageDirectory = "wwwroot/Images";
+        private string ImageDirectory { get; set; }
 
         internal ImageDataAccess()
         {
@@ -27,6 +30,15 @@ namespace artmdv_webapi.Areas.v2.DataAccess
             Database = client.GetDatabase("v2");
             Collection = Database.GetCollection<Image>("Images");
             GridFs = new GridFSBucket(Database);
+
+            var fs = new FileStream("config.json", FileMode.Open, FileAccess.Read);
+            JObject config = null;
+            using (StreamReader streamReader = new StreamReader(fs))
+            using (JsonTextReader reader = new JsonTextReader(streamReader))
+            {
+                config = (JObject)JToken.ReadFrom(reader);
+            }
+            ImageDirectory = config?.GetValue("ImageDirectory").ToString();
         }
 
         public string Create(Image image, Stream imagecontent, Stream thumbContent)
