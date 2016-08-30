@@ -76,6 +76,29 @@ namespace artmdv_webapi.Areas.v2.Controllers
             return null;
         }
 
+        [HttpGet]
+        public string TestFile()
+        {
+            try
+            {
+                var fs = new FileStream("config.json", FileMode.Open, FileAccess.Read);
+                JObject config = null;
+                using (StreamReader streamReader = new StreamReader(fs))
+                using (JsonTextReader reader = new JsonTextReader(streamReader))
+                {
+                    config = (JObject)JToken.ReadFrom(reader);
+                }
+                var ImageDirectory = config?.GetValue("ImageDirectory").ToString();
+
+                Directory.CreateDirectory(ImageDirectory);
+                return "amazing";
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
+
         [HttpPut]
         public dynamic UpdateImage([FromBody]ImageUpdateDto imageVm)
         {
