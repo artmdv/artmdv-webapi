@@ -75,7 +75,25 @@ namespace artmdv_webapi.Areas.v2.Controllers
             }
             return null;
         }
-        
+
+        [HttpGet]
+        public string TestFile()
+        {
+            try
+            {
+                var logPath = System.IO.Path.GetTempFileName();
+                var logFile = System.IO.File.Create(logPath);
+                var logWriter = new System.IO.StreamWriter(logFile);
+                logWriter.WriteLine("Log message");
+                logWriter.Dispose();
+                return "amazing";
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
+
         [HttpPut]
         public dynamic UpdateImage([FromBody]ImageUpdateDto imageVm)
         {
