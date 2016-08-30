@@ -43,30 +43,23 @@ namespace artmdv_webapi.Areas.v2.DataAccess
 
         public string Create(Image image, Stream imagecontent, Stream thumbContent)
         {
-            try
+            imagecontent.Position = 0;
+            var imageId = GridFs.UploadFromStream(image.Filename, imagecontent);
+            image.ContentId = imageId.ToString();
+            thumbContent.Position = 0;
+            var thumbId = GridFs.UploadFromStream(image.Thumb.Filename, thumbContent);
+            image.Thumb.ContentId = thumbId.ToString();
+            image.Id = ObjectId.GenerateNewId(DateTime.Now);
+            Collection.InsertOne(image);
+
+            Directory.CreateDirectory(ImageDirectory);
+
+            using (var fileStream = File.Create($"{ImageDirectory}/{image.Id}{Path.GetExtension(image.Filename)}"))
             {
                 imagecontent.Position = 0;
-                var imageId = GridFs.UploadFromStream(image.Filename, imagecontent);
-                image.ContentId = imageId.ToString();
-                thumbContent.Position = 0;
-                var thumbId = GridFs.UploadFromStream(image.Thumb.Filename, thumbContent);
-                image.Thumb.ContentId = thumbId.ToString();
-                image.Id = ObjectId.GenerateNewId(DateTime.Now);
-                Collection.InsertOne(image);
-
-                Directory.CreateDirectory(ImageDirectory);
-
-                using (var fileStream = File.Create($"{ImageDirectory}/{image.Id}{Path.GetExtension(image.Filename)}"))
-                {
-                    imagecontent.Position = 0;
-                    imagecontent.CopyTo(fileStream);
-                }
-                return image.Id.ToString();
+                imagecontent.CopyTo(fileStream);
             }
-            catch (Exception ex)
-            {
-                return ex.Message;
-            }
+            return image.Id.ToString();
         }
 
         public Image Update(Image image)
