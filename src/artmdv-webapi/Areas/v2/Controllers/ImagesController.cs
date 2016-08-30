@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using ImageResizer;
 using ImageResizer.ExtensionMethods;
 using Microsoft.AspNet.Cors;
 using Microsoft.AspNet.Http;
+using Microsoft.AspNet.Http.Extensions;
 using Microsoft.AspNet.Mvc;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
@@ -106,14 +108,29 @@ namespace artmdv_webapi.Areas.v2.Controllers
 
         private dynamic DecorateImage(Image image)
         {
+            var uri = new Uri(Request.GetDisplayUrl());
+            var host = uri.GetLeftPart(UriPartial.Authority);
+            var dataAcces = new ImageDataAccess();
+            var imageRelativePath = dataAcces.GetPath(image);
+            var imagePath = imageRelativePath != null ? $"{host}/{imageRelativePath}" : Url.Link("ImageContentRoute", new {image.Id});
+            
+            var thumbPath = Url.Link("ThumbContentRoute", new { image.Id });
+            var annotationPath = "";
+            if (!string.IsNullOrEmpty(image.Annotation))
+            {
+                var annotationRelativePath = dataAcces.GetAnnotationPath(image);
+                annotationPath = annotationRelativePath != null ? $"{host}/{annotationRelativePath}" : Url.Link("AnnotationContentRoute", new {image.Id});
+            }
+            
+
             var result = new
             {
                 Image = image,
                 links = new
                 {
-                    ImageContent = Url.Link("ImageContentRoute", new { image.Id }),
-                    ThumbnailContent = Url.Link("ThumbContentRoute", new { image.Id }),
-                    AnnotationContent = image.Annotation != null ? Url.Link("AnnotationContentRoute", new { image.Id }) : ""
+                    ImageContent = imagePath,
+                    ThumbnailContent = thumbPath,
+                    AnnotationContent = annotationPath
                 },
                 ForumPost = $"[url={Url.Link("ImageContentRoute", new { image.Id })}][img]{Url.Link("ThumbContentRoute", new { image.Id })}[/img][/url]"
             };
@@ -174,6 +191,8 @@ namespace artmdv_webapi.Areas.v2.Controllers
             {
                 var dataAcces = new ImageDataAccess();
                 var image = dataAcces.GetAnnotationContent(id);
+                if (image == null)
+                    return null;
                 return new FileStreamResult(image, "image/jpeg");
             }
         }

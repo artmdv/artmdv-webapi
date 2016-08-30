@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Mvc;
 using artmdv_webapi.Areas.v2.Models;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
+using Microsoft.AspNet.Mvc;
 
 namespace artmdv_webapi.Areas.v2.DataAccess
 {
@@ -16,6 +18,8 @@ namespace artmdv_webapi.Areas.v2.DataAccess
         private GridFSBucket GridFs { get; set; }
         public IMongoDatabase Database { get; set; }
         private IMongoCollection<Image> Collection { get; set; }
+
+        private const string ImageDirectory = "wwwroot/Images";
 
         internal ImageDataAccess()
         {
@@ -35,6 +39,14 @@ namespace artmdv_webapi.Areas.v2.DataAccess
             image.Thumb.ContentId = thumbId.ToString();
             image.Id = ObjectId.GenerateNewId(DateTime.Now);
             Collection.InsertOne(image);
+
+            Directory.CreateDirectory(ImageDirectory);
+
+            using (var fileStream = File.Create($"{ImageDirectory}/{image.Id}{Path.GetExtension(image.Filename)}"))
+            {
+                imagecontent.Position = 0;
+                imagecontent.CopyTo(fileStream);
+            }
             return image.Id.ToString();
         }
 
@@ -43,11 +55,22 @@ namespace artmdv_webapi.Areas.v2.DataAccess
             var builder = Builders<Image>.Filter;
             var filter = builder.Eq("_id", image.Id);
             Collection.ReplaceOne(filter, image);
+            if (!File.Exists($"{ImageDirectory}/{image.Id}.{Path.GetExtension(image.Filename)}"))
+            {
+                using (var fileStream = File.Create($"{ImageDirectory}/{image.Id}{Path.GetExtension(image.Filename)}"))
+                {
+                    var imagecontent = GetImageContent(image.Id.ToString());
+                    imagecontent.Position = 0;
+                    imagecontent.CopyTo(fileStream);
+                }
+            }
             return image;
         }
 
         public Image Get(string id)
         {
+            if (string.IsNullOrEmpty(id))
+                return null;
             var builder = Builders<Image>.Filter;
             var filter = builder.Eq("_id", ObjectId.Parse(id));
             return Collection.Find(filter).FirstOrDefault();
@@ -65,6 +88,8 @@ namespace artmdv_webapi.Areas.v2.DataAccess
 
         public Stream GetImageContent(string id)
         {
+            if (string.IsNullOrEmpty(id))
+                return null;
             var image = Get(id);
 
             var content = new MemoryStream();
@@ -98,6 +123,23 @@ namespace artmdv_webapi.Areas.v2.DataAccess
         {
             var image = Get(id);
             return GetImageContent(image.Annotation);
+        }
+
+        public string GetPath(Image image)
+        {
+            if (image == null)
+                return null;
+            if (File.Exists($"{ImageDirectory}/{image.Id}{Path.GetExtension(image.Filename)}"))
+            {
+                return $"Images/{image.Id}{Path.GetExtension(image.Filename)}";
+            }
+            return null;
+        }
+
+        public string GetAnnotationPath(Image image)
+        {
+            var annotatedImage = Get(image.Annotation);
+            return GetPath(annotatedImage);
         }
     }
 }
