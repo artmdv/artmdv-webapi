@@ -185,20 +185,6 @@ namespace artmdv_webapi.Areas.v2.Controllers
             }
         }
 
-        [Microsoft.AspNet.Mvc.HttpGet]
-        [Microsoft.AspNet.Mvc.Route("Test", Name = "TestRoute")]
-        public ActionResult Test()
-        {
-            try
-            {
-                return new JsonResult(new {works=true});
-            }
-            catch (Exception ex)
-            {
-                return new ExceptionResult(ex, true);
-            }
-        }
-
         [Microsoft.AspNet.Mvc.Route("{id}/Thumbnail", Name = "ThumbContentRoute")]
         public ActionResult GetThumb(string id)
         {
