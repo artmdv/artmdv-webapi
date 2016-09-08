@@ -1,7 +1,9 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web.Http;
 using artmdv_webapi.Areas.v2.DataAccess;
 using artmdv_webapi.Areas.v2.Models;
 using ImageResizer;
@@ -17,7 +19,7 @@ using StatsdClient;
 namespace artmdv_webapi.Areas.v2.Controllers
 {
     [Area("v2")]
-    [Route("[area]/Images")]
+    [Microsoft.AspNet.Mvc.Route("[area]/Images")]
     [EnableCors("default")]
     public class ImagesController : Controller
     {
@@ -28,47 +30,54 @@ namespace artmdv_webapi.Areas.v2.Controllers
             StatsDClient = new Statsd("127.0.0.1", 8125);
         }
 
-        [HttpPost]
+        [Microsoft.AspNet.Mvc.HttpPost]
         public dynamic UploadImage(ImageUploadDto model)
         {
-            CheckPassword(model?.password);
-            
-            if (model?.file?.Length > 0)
+            try
             {
-                var fileName = ContentDispositionHeaderValue
-                    .Parse(model.file.ContentDisposition)
-                    .FileName
-                    .Trim('"'); // FileName returns "fileName.ext"(with double quotes) in beta 3
+                CheckPassword(model?.password);
 
-                var dataAcces = new ImageDataAccess();
-
-                var fileStream = model.file.OpenReadStream();
-
-                var image = new Image
+                if (model?.file?.Length > 0)
                 {
-                    Filename = fileName,
-                    Description = model.description,
-                    Title = model.title,
-                    Tags = model.tags.Split(','),
-                    Date = model.date,
-                    Thumb = new Thumbnail
+                    var fileName = ContentDispositionHeaderValue
+                        .Parse(model.file.ContentDisposition)
+                        .FileName
+                        .Trim('"'); // FileName returns "fileName.ext"(with double quotes) in beta 3
+
+                    var dataAcces = new ImageDataAccess();
+
+                    var fileStream = model.file.OpenReadStream();
+
+                    var image = new Image
                     {
-                        Filename = $"thumb_{fileName}"
-                    },
-                    Annotation = model.annotation
-                };
+                        Filename = fileName,
+                        Description = model.description,
+                        Title = model.title,
+                        Tags = model.tags.Split(','),
+                        Date = model.date,
+                        Thumb = new Thumbnail
+                        {
+                            Filename = $"thumb_{fileName}"
+                        },
+                        Annotation = model.annotation
+                    };
 
-                var thumb = GenerateThumbnail(fileStream.CopyToMemoryStream());
+                    var thumb = GenerateThumbnail(fileStream.CopyToMemoryStream());
 
-                var imageId = dataAcces.Create(image, fileStream, thumb);
+                    var imageId = dataAcces.Create(image, fileStream, thumb);
 
-                return GetImage(imageId.ToString());
+                    return GetImage(imageId.ToString());
+                }
+                return null;
             }
-            return null;
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
         }
 
-        [HttpPut]
-        public dynamic UpdateImage([FromBody]ImageUpdateDto imageVm)
+        [Microsoft.AspNet.Mvc.HttpPut]
+        public dynamic UpdateImage([Microsoft.AspNet.Mvc.FromBody]ImageUpdateDto imageVm)
         {
             CheckPassword(imageVm?.password);
             var dataAcces = new ImageDataAccess();
@@ -80,8 +89,8 @@ namespace artmdv_webapi.Areas.v2.Controllers
             return null;
         }
 
-        [HttpDelete]
-        [Route("{id}/{password}")]
+        [Microsoft.AspNet.Mvc.HttpDelete]
+        [Microsoft.AspNet.Mvc.Route("{id}/{password}")]
         public dynamic DeleteImage(string password, string id)
         {
             CheckPassword(password);
@@ -90,17 +99,24 @@ namespace artmdv_webapi.Areas.v2.Controllers
             return null;
         }
 
-        [HttpGet]
-        [Route("{id}")]
+        [Microsoft.AspNet.Mvc.HttpGet]
+        [Microsoft.AspNet.Mvc.Route("{id}")]
         public dynamic GetImage(string id)
         {
-            StatsDClient.LogCount("Get.Image.Count");
-            using (StatsDClient.LogTiming("Get.Image.ElapsedMs"))
+            try
             {
-                var dataAcces = new ImageDataAccess();
-                var image = dataAcces.Get(id);
+                StatsDClient.LogCount("Get.Image.Count");
+                using (StatsDClient.LogTiming("Get.Image.ElapsedMs"))
+                {
+                    var dataAcces = new ImageDataAccess();
+                    var image = dataAcces.Get(id);
 
-                return DecorateImage(image);
+                    return DecorateImage(image);
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
             }
         }
 
@@ -120,61 +136,90 @@ namespace artmdv_webapi.Areas.v2.Controllers
             return result;
         }
 
-        [HttpGet]
-        public async Task<dynamic> Getall(string tag=null)
+        [Microsoft.AspNet.Mvc.HttpGet]
+        public async Task<dynamic> Getall(string tag = null)
         {
-            StatsDClient.LogCount($"Get.Images.{tag ?? "All"}.Count");
-            StatsDClient.LogCount("Get.Images.Count");
-            using (StatsDClient.LogTiming("Get.Images.ElapsedMs"))
+            try
             {
-                if (tag == "all")
+                StatsDClient.LogCount($"Get.Images.{tag ?? "All"}.Count");
+                StatsDClient.LogCount("Get.Images.Count");
+                using (StatsDClient.LogTiming("Get.Images.ElapsedMs"))
                 {
-                    tag = string.Empty;
+                    if (tag == "all")
+                    {
+                        tag = string.Empty;
+                    }
+                    tag = tag ?? string.Empty;
+                    var dataAcces = new ImageDataAccess();
+                    var images = await dataAcces.GetAllByTag(tag);
+
+                    images = images.OrderByDescending(x => x.Date).ToList();
+
+                    return images.Select(image => DecorateImage(image)).ToList();
                 }
-                tag = tag ?? string.Empty;
-                var dataAcces = new ImageDataAccess();
-                var images = await dataAcces.GetAllByTag(tag);
-
-                images = images.OrderByDescending(x => x.Date).ToList();
-
-                return images.Select(image => DecorateImage(image)).ToList();
             }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        
         }
 
-        [HttpGet]
-        [Route("{id}/Content", Name = "ImageContentRoute")]
+        [Microsoft.AspNet.Mvc.HttpGet]
+        [Microsoft.AspNet.Mvc.Route("{id}/Content", Name = "ImageContentRoute")]
         public ActionResult GetImageContent(string id)
         {
-            StatsDClient.LogCount("Get.Image.Content.Count");
-            using (StatsDClient.LogTiming("Get.Image.Content.ElapsedMs"))
+            try
             {
-                var dataAcces = new ImageDataAccess();
-                var image = dataAcces.GetImageContent(id);
-                return new FileStreamResult(image, "image/jpeg");
+                StatsDClient.LogCount("Get.Image.Content.Count");
+                using (StatsDClient.LogTiming("Get.Image.Content.ElapsedMs"))
+                {
+                    var dataAcces = new ImageDataAccess();
+                    var image = dataAcces.GetImageContent(id);
+                    return new FileStreamResult(image, "image/jpeg");
+                }
+            }
+            catch (Exception ex)
+            {
+                return new ExceptionResult(ex, true);
             }
         }
 
-        [Route("{id}/Thumbnail", Name = "ThumbContentRoute")]
+        [Microsoft.AspNet.Mvc.Route("{id}/Thumbnail", Name = "ThumbContentRoute")]
         public ActionResult GetThumb(string id)
         {
-            StatsDClient.LogCount("Get.Image.Thumbnail.Count");
-            using (StatsDClient.LogTiming("Get.Image.Thumbnail.ElapsedMs"))
+            try
             {
-                var dataAcces = new ImageDataAccess();
-                var image = dataAcces.GetThumbContent(id);
-                return new FileStreamResult(image, "image/jpeg");
+                StatsDClient.LogCount("Get.Image.Thumbnail.Count");
+                using (StatsDClient.LogTiming("Get.Image.Thumbnail.ElapsedMs"))
+                {
+                    var dataAcces = new ImageDataAccess();
+                    var image = dataAcces.GetThumbContent(id);
+                    return new FileStreamResult(image, "image/jpeg");
+                }
+            }
+            catch (Exception ex)
+            {
+                return new ExceptionResult(ex, true);
             }
         }
 
-        [Route("{id}/Annotation", Name = "AnnotationContentRoute")]
+        [Microsoft.AspNet.Mvc.Route("{id}/Annotation", Name = "AnnotationContentRoute")]
         public ActionResult GetAnnotation(string id)
         {
-            StatsDClient.LogCount("Get.Image.Annotation.Count");
-            using (StatsDClient.LogTiming("Get.Image.Annotation.ElapsedMs"))
+            try
             {
-                var dataAcces = new ImageDataAccess();
-                var image = dataAcces.GetAnnotationContent(id);
-                return new FileStreamResult(image, "image/jpeg");
+                StatsDClient.LogCount("Get.Image.Annotation.Count");
+                using (StatsDClient.LogTiming("Get.Image.Annotation.ElapsedMs"))
+                {
+                    var dataAcces = new ImageDataAccess();
+                    var image = dataAcces.GetAnnotationContent(id);
+                    return new FileStreamResult(image, "image/jpeg");
+                }
+            }
+            catch (Exception ex)
+            {
+                return new ExceptionResult(ex, true);
             }
         }
 
