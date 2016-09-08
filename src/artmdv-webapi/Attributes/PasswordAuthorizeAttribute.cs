@@ -1,8 +1,6 @@
 ﻿using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Web.Http;
-using Microsoft.AspNet.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace artmdv_webapi.Attributes
 {

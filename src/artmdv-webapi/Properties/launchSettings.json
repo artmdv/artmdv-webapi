@@ -3,7 +3,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:21298/",
+      "applicationUrl": "http://localhost:5004",
       "sslPort": 0
     }
   },
@@ -11,14 +11,17 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "api/values",
       "environmentVariables": {
-        "ASPNET_ENV": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
     "kestrel": {
-      "commandName": "kestrel",
-      "sdkVersion": "dnx-clr-win-x86.1.0.0-rc1-update1"
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "http://localhost:5004",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
     }
   }
 }
