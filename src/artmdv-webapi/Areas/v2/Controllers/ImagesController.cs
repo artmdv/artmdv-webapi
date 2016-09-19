@@ -22,17 +22,16 @@ namespace artmdv_webapi.Areas.v2.Controllers
     [EnableCors("default")]
     public class ImagesController : Controller
     {
-        private Statsd StatsDClient { get; set; }
+//        private Statsd StatsDClient { get; set; }
 
         public ImagesController()
         {
-            StatsDClient = new Statsd("127.0.0.1", 8125);
+//            StatsDClient = new Statsd("127.0.0.1", 8125);
         }
 
         [HttpPost]
         public dynamic UploadImage(ImageUploadDto model)
         {
-            return true;
             CheckPassword(model?.password);
 
             try
@@ -103,14 +102,14 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [Route("{id}")]
         public dynamic GetImage(string id)
         {
-            StatsDClient.LogCount("Get.Image.Count");
-            using (StatsDClient.LogTiming("Get.Image.ElapsedMs"))
-            {
+//            StatsDClient.LogCount("Get.Image.Count");
+//            using (StatsDClient.LogTiming("Get.Image.ElapsedMs"))
+//            {
                 var dataAcces = new ImageDataAccess();
                 var image = dataAcces.Get(id);
 
                 return DecorateImage(image);
-            }
+//            }
         }
 
         private dynamic DecorateImage(Image image)
@@ -132,10 +131,10 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [HttpGet]
         public async Task<dynamic> Getall(string tag=null)
         {
-            StatsDClient.LogCount($"Get.Images.{tag ?? "All"}.Count");
-            StatsDClient.LogCount("Get.Images.Count");
-            using (StatsDClient.LogTiming("Get.Images.ElapsedMs"))
-            {
+//            StatsDClient.LogCount($"Get.Images.{tag ?? "All"}.Count");
+//            StatsDClient.LogCount("Get.Images.Count");
+//            using (StatsDClient.LogTiming("Get.Images.ElapsedMs"))
+//            {
                 if (tag == "all")
                 {
                     tag = string.Empty;
@@ -147,44 +146,44 @@ namespace artmdv_webapi.Areas.v2.Controllers
                 images = images.OrderByDescending(x => x.Date).ToList();
 
                 return images.Select(image => DecorateImage(image)).ToList();
-            }
+//            }
         }
 
         [HttpGet]
         [Route("{id}/Content", Name = "ImageContentRoute")]
         public ActionResult GetImageContent(string id)
         {
-            StatsDClient.LogCount("Get.Image.Content.Count");
-            using (StatsDClient.LogTiming("Get.Image.Content.ElapsedMs"))
-            {
+//            StatsDClient.LogCount("Get.Image.Content.Count");
+//            using (StatsDClient.LogTiming("Get.Image.Content.ElapsedMs"))
+//            {
                 var dataAcces = new ImageDataAccess();
                 var image = dataAcces.GetImageContent(id);
                 return new FileStreamResult(image, "image/jpeg");
-            }
+//            }
         }
 
         [Route("{id}/Thumbnail", Name = "ThumbContentRoute")]
         public ActionResult GetThumb(string id)
         {
-            StatsDClient.LogCount("Get.Image.Thumbnail.Count");
-            using (StatsDClient.LogTiming("Get.Image.Thumbnail.ElapsedMs"))
-            {
+//            StatsDClient.LogCount("Get.Image.Thumbnail.Count");
+//            using (StatsDClient.LogTiming("Get.Image.Thumbnail.ElapsedMs"))
+//            {
                 var dataAcces = new ImageDataAccess();
                 var image = dataAcces.GetThumbContent(id);
                 return new FileStreamResult(image, "image/jpeg");
-            }
+//            }
         }
 
         [Route("{id}/Annotation", Name = "AnnotationContentRoute")]
         public ActionResult GetAnnotation(string id)
         {
-            StatsDClient.LogCount("Get.Image.Annotation.Count");
-            using (StatsDClient.LogTiming("Get.Image.Annotation.ElapsedMs"))
-            {
+//            StatsDClient.LogCount("Get.Image.Annotation.Count");
+//            using (StatsDClient.LogTiming("Get.Image.Annotation.ElapsedMs"))
+//            {
                 var dataAcces = new ImageDataAccess();
                 var image = dataAcces.GetAnnotationContent(id);
                 return new FileStreamResult(image, "image/jpeg");
-            }
+//            }
         }
 
         private Stream GenerateThumbnail(MemoryStream image)
