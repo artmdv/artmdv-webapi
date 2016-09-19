@@ -32,6 +32,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [HttpPost]
         public dynamic UploadImage(ImageUploadDto model)
         {
+            return true;
             CheckPassword(model?.password);
 
             try
