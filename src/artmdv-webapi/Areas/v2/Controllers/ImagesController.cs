@@ -78,7 +78,6 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [HttpPut]
         public dynamic UpdateImage([FromBody]ImageUpdateDto imageVm)
         {
-            return null;
             CheckPassword(imageVm?.password);
             var dataAcces = new ImageDataAccess();
             if (imageVm?.image != null)
