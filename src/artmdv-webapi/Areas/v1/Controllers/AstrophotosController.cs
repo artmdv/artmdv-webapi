@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using artmdv_webapi.Areas.v1.DataAccess;
 using artmdv_webapi.Areas.v1.Models;
@@ -74,35 +73,28 @@ namespace artmdv_webapi.Areas.v1.Controllers
         [HttpPost]
         public dynamic UploadImage(IFormFile file, string title, string description, string password)
         {
-            try
+            if (CheckPassword(password))
             {
-                if (CheckPassword(password))
+                if (file.Length > 0)
                 {
-                    if (file.Length > 0)
-                    {
-                        var fileName = ContentDispositionHeaderValue
-                            .Parse(file.ContentDisposition)
-                            .FileName
-                            .Trim('"'); // FileName returns "fileName.ext"(with double quotes) in beta 3
+                    var fileName = ContentDispositionHeaderValue
+                        .Parse(file.ContentDisposition)
+                        .FileName
+                        .Trim('"'); // FileName returns "fileName.ext"(with double quotes) in beta 3
 
-                        var dataAcces = new ImagesMongo();
-                        var imageId = dataAcces.SaveImage(file.OpenReadStream(), fileName);
-                        var image = new AstroImage()
-                        {
-                            Id = imageId,
-                            Image = Url.Link("ImageRoute", new {id = imageId}),
-                            Thumbnail = Url.Link("ThumbRoute", new {id = imageId}),
-                            Title = title,
-                            Description = description
-                        };
-                        dataAcces.Create(image);
-                        return new {Image = image, ForumPost = $"[url={image.Image}][img]{image.Thumbnail}[/img][/url]"};
-                    }
+                    var dataAcces = new ImagesMongo();
+                    var imageId = dataAcces.SaveImage(file.OpenReadStream(), fileName);
+                    var image = new AstroImage()
+                    {
+                        Id = imageId,
+                        Image = Url.Link("ImageRoute", new {id = imageId}),
+                        Thumbnail = Url.Link("ThumbRoute", new {id = imageId}),
+                        Title = title,
+                        Description = description
+                    };
+                    dataAcces.Create(image);
+                    return new { Image = image, ForumPost = $"[url={image.Image}][img]{image.Thumbnail}[/img][/url]"};
                 }
-            }
-            catch (Exception ex)
-            {
-                return ex;
             }
             return null;
         }

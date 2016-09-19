@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -32,37 +33,44 @@ namespace artmdv_webapi.Areas.v2.Controllers
         public dynamic UploadImage(ImageUploadDto model)
         {
             CheckPassword(model?.password);
-            
-            if (model?.file?.Length > 0)
+
+            try
             {
-                var fileName = ContentDispositionHeaderValue
-                    .Parse(model.file.ContentDisposition)
-                    .FileName
-                    .Trim('"'); // FileName returns "fileName.ext"(with double quotes) in beta 3
-
-                var dataAcces = new ImageDataAccess();
-
-                var fileStream = model.file.OpenReadStream();
-
-                var image = new Image
+                if (model?.file?.Length > 0)
                 {
-                    Filename = fileName,
-                    Description = model.description,
-                    Title = model.title,
-                    Tags = model.tags.Split(','),
-                    Date = model.date,
-                    Thumb = new Thumbnail
+                    var fileName = ContentDispositionHeaderValue
+                        .Parse(model.file.ContentDisposition)
+                        .FileName
+                        .Trim('"'); // FileName returns "fileName.ext"(with double quotes) in beta 3
+
+                    var dataAcces = new ImageDataAccess();
+
+                    var fileStream = model.file.OpenReadStream();
+
+                    var image = new Image
                     {
-                        Filename = $"thumb_{fileName}"
-                    },
-                    Annotation = model.annotation
-                };
+                        Filename = fileName,
+                        Description = model.description,
+                        Title = model.title,
+                        Tags = model.tags.Split(','),
+                        Date = model.date,
+                        Thumb = new Thumbnail
+                        {
+                            Filename = $"thumb_{fileName}"
+                        },
+                        Annotation = model.annotation
+                    };
 
-                var thumb = GenerateThumbnail(fileStream.CopyToMemoryStream());
+                    var thumb = GenerateThumbnail(fileStream.CopyToMemoryStream());
 
-                var imageId = dataAcces.Create(image, fileStream, thumb);
+                    var imageId = dataAcces.Create(image, fileStream, thumb);
 
-                return GetImage(imageId.ToString());
+                    return GetImage(imageId.ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex;
             }
             return null;
         }
