@@ -37,7 +37,7 @@ namespace artmdv_webapi
         {
             // Configure the HTTP request pipeline.
             app.UseStaticFiles();
-            
+            app.UseDeveloperExceptionPage();
             // Add MVC to the request pipeline.
             app.UseMvc(routes =>
             {
