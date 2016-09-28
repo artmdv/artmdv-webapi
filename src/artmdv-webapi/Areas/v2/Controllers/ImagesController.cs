@@ -99,6 +99,13 @@ namespace artmdv_webapi.Areas.v2.Controllers
         }
 
         [HttpGet]
+        [Route("GetFolder")]
+        public dynamic GetFolder()
+        {
+            return Directory.GetCurrentDirectory();
+        }
+
+        [HttpGet]
         [Route("{id}")]
         public dynamic GetImage(string id)
         {
