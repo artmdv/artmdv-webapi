@@ -10,3 +10,5 @@ _NCrunch_artmdv-webapi/*
 **/project.lock.json
 config.json
 test.html
+src/artmdv-webapi/wwwroot/Images/
+src/artmdv-webapi/Images/

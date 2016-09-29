@@ -1,7 +1,4 @@
-﻿using artmdv_webapi.Areas.v1.Models;
-using MongoDB.Bson;
-
-namespace artmdv_webapi.Areas.v2.Models
+﻿namespace artmdv_webapi.Areas.v2.Models
 {
     public class Thumbnail: IImage
     {

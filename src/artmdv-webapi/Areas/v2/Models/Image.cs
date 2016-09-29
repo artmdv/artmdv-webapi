@@ -1,6 +1,4 @@
-﻿using System;
-using artmdv_webapi.Areas.v1.Models;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 
 namespace artmdv_webapi.Areas.v2.Models
 {
