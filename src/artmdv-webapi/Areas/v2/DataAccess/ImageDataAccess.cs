@@ -2,15 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Mvc;
 using artmdv_webapi.Areas.v2.Models;
 using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
-using Microsoft.AspNet.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -39,6 +35,10 @@ namespace artmdv_webapi.Areas.v2.DataAccess
                 config = (JObject)JToken.ReadFrom(reader);
             }
             ImageDirectory = config?.GetValue("ImageDirectory").ToString();
+            if (!Directory.Exists(ImageDirectory))
+            {
+                Directory.CreateDirectory(ImageDirectory);
+            }
         }
 
         public string Create(Image image, Stream imagecontent, Stream thumbContent)

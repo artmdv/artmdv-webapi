@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using artmdv_webapi.Areas.v1.Models;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 
 namespace artmdv_webapi.Areas.v2.Models
 {
@@ -35,6 +30,23 @@ namespace artmdv_webapi.Areas.v2.Models
                 Annotation = Annotation
             };
             return image;
+        }
+
+        public static ImageViewModel ToViewModel(Image image)
+        {
+            var vm = new ImageViewModel
+            {
+                Id = image.Id.ToString(),
+                Filename = image.Filename,
+                ContentId = image.ContentId,
+                Description = image.Description,
+                Title = image.Title,
+                Thumb = image.Thumb,
+                Tags = image.Tags,
+                Date = image.Date,
+                Annotation = image.Annotation
+            };
+            return vm;
         }
     }
 }

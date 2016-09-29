@@ -5,19 +5,15 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using artmdv_webapi.Areas.v2.DataAccess;
 using artmdv_webapi.Areas.v2.Models;
-using ImageResizer;
-using ImageResizer.ExtensionMethods;
-using Microsoft.AspNet.Cors;
-using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Http.Extensions;
-using Microsoft.AspNet.Mvc;
+using ImageProcessorCore;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using StatsdClient;
+using Image = artmdv_webapi.Areas.v2.Models.Image;
 
 namespace artmdv_webapi.Areas.v2.Controllers
 {
@@ -26,11 +22,8 @@ namespace artmdv_webapi.Areas.v2.Controllers
     [EnableCors("default")]
     public class ImagesController : Controller
     {
-        private Statsd StatsDClient { get; set; }
-
         public ImagesController()
         {
-            StatsDClient = new Statsd("127.0.0.1", 8125);
         }
 
         [HttpPost]
@@ -45,7 +38,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
                     var fileName = ContentDispositionHeaderValue
                         .Parse(model.file.ContentDisposition)
                         .FileName
-                        .Trim('"'); // FileName returns "fileName.ext"(with double quotes) in beta 3
+                        .Trim('"'); 
 
                     var dataAcces = new ImageDataAccess();
 
@@ -64,8 +57,9 @@ namespace artmdv_webapi.Areas.v2.Controllers
                         },
                         Annotation = model.annotation
                     };
-
-                    var thumb = GenerateThumbnail(fileStream.CopyToMemoryStream());
+                    var thumbStream = new MemoryStream();
+                    fileStream.CopyTo(thumbStream);
+                    var thumb = GenerateThumbnail(thumbStream);
 
                     var imageId = dataAcces.Create(image, fileStream, thumb);
 
@@ -80,6 +74,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
         }
 
         [HttpGet]
+        [Route("TestFile")]
         public string TestFile()
         {
             try
@@ -124,20 +119,16 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [Route("{id}")]
         public dynamic GetImage(string id)
         {
-            StatsDClient.LogCount("Get.Image.Count");
-            using (StatsDClient.LogTiming("Get.Image.ElapsedMs"))
-            {
                 var dataAcces = new ImageDataAccess();
                 var image = dataAcces.Get(id);
 
                 return DecorateImage(image);
-            }
         }
 
         private dynamic DecorateImage(Image image)
         {
             var uri = new Uri(Request.GetDisplayUrl());
-            var host = uri.GetLeftPart(UriPartial.Authority);
+            var host = uri.AbsoluteUri.Replace(uri.LocalPath, "");
             var dataAcces = new ImageDataAccess();
             var imageRelativePath = dataAcces.GetPath(image);
             var imagePath = imageRelativePath != null ? $"{host}/{imageRelativePath}" : Url.Link("ImageContentRoute", new {image.Id});
@@ -153,7 +144,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
 
             var result = new
             {
-                Image = image,
+                Image = ImageViewModel.ToViewModel(image),
                 links = new
                 {
                     ImageContent = imagePath,
@@ -168,10 +159,6 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [HttpGet]
         public async Task<dynamic> Getall(string tag=null)
         {
-            StatsDClient.LogCount($"Get.Images.{tag ?? "All"}.Count");
-            StatsDClient.LogCount("Get.Images.Count");
-            using (StatsDClient.LogTiming("Get.Images.ElapsedMs"))
-            {
                 if (tag == "all")
                 {
                     tag = string.Empty;
@@ -183,55 +170,41 @@ namespace artmdv_webapi.Areas.v2.Controllers
                 images = images.OrderByDescending(x => x.Date).ToList();
 
                 return images.Select(image => DecorateImage(image)).ToList();
-            }
         }
 
         [HttpGet]
         [Route("{id}/Content", Name = "ImageContentRoute")]
         public ActionResult GetImageContent(string id)
         {
-            StatsDClient.LogCount("Get.Image.Content.Count");
-            using (StatsDClient.LogTiming("Get.Image.Content.ElapsedMs"))
-            {
                 var dataAcces = new ImageDataAccess();
                 var image = dataAcces.GetImageContent(id);
                 return new FileStreamResult(image, "image/jpeg");
-            }
         }
 
         [Route("{id}/Thumbnail", Name = "ThumbContentRoute")]
         public ActionResult GetThumb(string id)
         {
-            StatsDClient.LogCount("Get.Image.Thumbnail.Count");
-            using (StatsDClient.LogTiming("Get.Image.Thumbnail.ElapsedMs"))
-            {
                 var dataAcces = new ImageDataAccess();
                 var image = dataAcces.GetThumbContent(id);
                 return new FileStreamResult(image, "image/jpeg");
-            }
         }
 
         [Route("{id}/Annotation", Name = "AnnotationContentRoute")]
         public ActionResult GetAnnotation(string id)
         {
-            StatsDClient.LogCount("Get.Image.Annotation.Count");
-            using (StatsDClient.LogTiming("Get.Image.Annotation.ElapsedMs"))
-            {
                 var dataAcces = new ImageDataAccess();
                 var image = dataAcces.GetAnnotationContent(id);
                 if (image == null)
                     return null;
                 return new FileStreamResult(image, "image/jpeg");
-            }
         }
 
         private Stream GenerateThumbnail(MemoryStream image)
         {
             image.Position = 0;
-            var config = new ImageResizer.Configuration.Config();
             var resizedStream = new MemoryStream();
-            var job = new ImageJob(image, resizedStream, new Instructions("width=400"));
-            config.Build(job);
+            var thumb = new ImageProcessorCore.Image(image);
+            thumb.Resize(400, thumb.Height*400/thumb.Width).Save(resizedStream);
             resizedStream.Position = 0;
             return resizedStream;
         }

@@ -14,7 +14,12 @@
     "Microsoft.Extensions.Logging.Console": "1.0.0",
     "Microsoft.Extensions.Logging.Debug": "1.0.0",
     "Microsoft.Extensions.Options.ConfigurationExtensions": "1.0.0",
-    "Simple.ImageResizer": "2.1.0"
+    "Microsoft.AspNetCore.Http.Extensions": "1.0.0",
+    "MongoDB.Driver": "2.3.0",
+    "MongoDB.Driver.GridFS": "2.3.0",
+    "Microsoft.AspNetCore.StaticFiles": "1.0.0",
+    "ChyImageProcessorCore": "1.0.0-alpha1031",
+    "System.Runtime.CompilerServices.Unsafe": "4.0.0"
   },
 
   "tools": {
