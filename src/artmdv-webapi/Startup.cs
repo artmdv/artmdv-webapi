@@ -1,4 +1,7 @@
 ﻿using System.IO;
+using Configuration;
+using Gallery.Contracts.Events;
+using Handlers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -19,6 +22,7 @@ namespace artmdv_webapi2
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
             Configuration = builder.Build();
+            RegisterEventHandlers();
         }
 
         public IConfigurationRoot Configuration { get; }
@@ -27,7 +31,7 @@ namespace artmdv_webapi2
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
-            services.AddMvc();
+            services.AddMvcCore();
             services.AddCors(x => x.AddPolicy("default", y => y.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
         }
 
@@ -39,10 +43,16 @@ namespace artmdv_webapi2
 
             app.UseStaticFiles();
 
+            var staticImagesDirectory = Path.Combine(Directory.GetCurrentDirectory(), @"Images");
+            if (!Directory.Exists(staticImagesDirectory))
+            {
+                Directory.CreateDirectory(staticImagesDirectory);
+            }
+
             app.UseStaticFiles(new StaticFileOptions()
             {
                 FileProvider = new PhysicalFileProvider(
-            Path.Combine(Directory.GetCurrentDirectory(), @"Images")),
+                    staticImagesDirectory),
                 RequestPath = new PathString("/Images")
             });
 
@@ -64,6 +74,11 @@ namespace artmdv_webapi2
             app.UseCors("default");
 
             app.UseMvc();
+        }
+
+        private void RegisterEventHandlers()
+        {
+            Rabbit.RegisterEventHandler<TestEvent>(@event=>new TestEventHandler().Handle(@event));
         }
     }
 }
