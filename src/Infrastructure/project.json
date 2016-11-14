@@ -2,7 +2,8 @@
   "version": "1.0.0-*",
 
   "dependencies": {
-    "Gallery.Contracts": "1.0.0-*",
+    "Configuration": "1.0.0-*",
+    "EasyNetQ-dotnet-core": "2.0.2-radicalgeek-netc0001",
     "NETStandard.Library": "1.6.1-preview1-24530-04"
   },
 

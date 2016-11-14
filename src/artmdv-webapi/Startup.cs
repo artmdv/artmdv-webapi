@@ -1,7 +1,4 @@
 ﻿using System.IO;
-using Configuration;
-using Gallery.Contracts.Events;
-using Handlers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -22,7 +19,6 @@ namespace artmdv_webapi2
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
             Configuration = builder.Build();
-            RegisterEventHandlers();
         }
 
         public IConfigurationRoot Configuration { get; }
@@ -74,11 +70,6 @@ namespace artmdv_webapi2
             app.UseCors("default");
 
             app.UseMvc();
-        }
-
-        private void RegisterEventHandlers()
-        {
-            Rabbit.RegisterEventHandler<TestEvent>(@event=>new TestEventHandler().Handle(@event));
         }
     }
 }

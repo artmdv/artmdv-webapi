@@ -6,10 +6,11 @@ namespace Configuration
 {
     public class ConfigReader
     {
-        public const string RabbitHost = "rabbitHost";
-        public const string RabbitPassword = "rabbitPassword";
-        public const string RabbitUser = "rabbitUser";
-
+        public static string RabbitConnectionString => Get("rabbitConnectionString");
+        public static string RabbitSubscriptionId => Get("rabbitSubscriptionId");
+        public static string EventStoreAddress => Get("eventStoreAddress");
+        public static string EventStoreUser => Get("eventStoreUser");
+        public static string EventStorePassword => Get("eventStorePassword");
 
         public static string Get(string name)
         {
