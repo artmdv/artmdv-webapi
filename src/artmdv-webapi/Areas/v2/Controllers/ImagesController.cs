@@ -55,7 +55,8 @@ namespace artmdv_webapi.Areas.v2.Controllers
                         {
                             Filename = $"thumb_{fileName}"
                         },
-                        Annotation = model.annotation
+                        Annotation = model.annotation,
+                        Inverted = model.inverted
                     };
                     var thumbStream = new MemoryStream();
                     fileStream.CopyTo(thumbStream);
@@ -135,12 +136,18 @@ namespace artmdv_webapi.Areas.v2.Controllers
             
             var thumbPath = Url.Link("ThumbContentRoute", new { image.Id });
             var annotationPath = "";
+            var invertedPath = "";
             if (!string.IsNullOrEmpty(image.Annotation))
             {
                 var annotationRelativePath = dataAcces.GetAnnotationPath(image);
                 annotationPath = annotationRelativePath != null ? $"{host}/{annotationRelativePath}" : Url.Link("AnnotationContentRoute", new {image.Id});
             }
-            
+            if (!string.IsNullOrEmpty(image.Inverted))
+            {
+                var invertedRelativePath = dataAcces.GetInvertedPath(image);
+                invertedPath = invertedRelativePath != null ? $"{host}/{invertedRelativePath}" : Url.Link("InvertedContentRoute", new { image.Id });
+            }
+
 
             var result = new
             {
@@ -149,7 +156,8 @@ namespace artmdv_webapi.Areas.v2.Controllers
                 {
                     ImageContent = imagePath,
                     ThumbnailContent = thumbPath,
-                    AnnotationContent = annotationPath
+                    AnnotationContent = annotationPath,
+                    InvertedContent = invertedPath
                 },
                 ForumPost = $"[url={Url.Link("ImageContentRoute", new { image.Id })}][img]{Url.Link("ThumbContentRoute", new { image.Id })}[/img][/url]"
             };
@@ -199,6 +207,16 @@ namespace artmdv_webapi.Areas.v2.Controllers
                 return new FileStreamResult(image, "image/jpeg");
         }
 
+        [Route("{id}/Inverted", Name = "InvertedContentRoute")]
+        public ActionResult GetInverted(string id)
+        {
+                var dataAcces = new ImageDataAccess();
+                var image = dataAcces.GetInvertedContent(id);
+                if (image == null)
+                    return null;
+                return new FileStreamResult(image, "image/jpeg");
+        }
+
         private Stream GenerateThumbnail(MemoryStream image)
         {
             image.Position = 0;
@@ -240,6 +258,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
         public string tags { get; set; }
         public string date { get; set; }
         public string annotation { get; set; }
+        public string inverted { get; set; }
         public string password { get; set; }
     }
 }

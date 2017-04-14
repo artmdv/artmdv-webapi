@@ -135,6 +135,12 @@ namespace artmdv_webapi.Areas.v2.DataAccess
             return GetImageContent(image.Annotation);
         }
 
+        public Stream GetInvertedContent(string id)
+        {
+            var image = Get(id);
+            return GetImageContent(image.Inverted);
+        }
+
         public string GetPath(Image image)
         {
             if (image == null)
@@ -150,6 +156,12 @@ namespace artmdv_webapi.Areas.v2.DataAccess
         {
             var annotatedImage = Get(image.Annotation);
             return GetPath(annotatedImage);
+        }
+
+        public string GetInvertedPath(Image image)
+        {
+            var invertedImage = Get(image.Inverted);
+            return GetPath(invertedImage);
         }
     }
 }

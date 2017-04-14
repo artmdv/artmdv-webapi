@@ -4,6 +4,7 @@
     {
         Image,
         Thumb,
-        Annotation
+        Annotation,
+        Inverted
     }
 }

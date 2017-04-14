@@ -12,6 +12,7 @@ namespace artmdv_webapi.Areas.v2.Models
         public string Title { get; set; }
         public Thumbnail Thumb { get; set; }
         public string Annotation { get; set; }
+        public string Inverted { get; set; }
         public string[] Tags { get; set; }
 
         public string Date { get; set; }
