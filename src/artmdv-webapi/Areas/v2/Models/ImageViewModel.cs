@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using System.Collections.Generic;
+using MongoDB.Bson;
 
 namespace artmdv_webapi.Areas.v2.Models
 {
@@ -15,6 +16,7 @@ namespace artmdv_webapi.Areas.v2.Models
         public string Inverted { get; set; }
         public string[] Tags { get; set; }
         public string Date { get; set; }
+        public IList<Revision> Revisions { get; set; }
 
         public Image ToImage()
         {
@@ -29,7 +31,8 @@ namespace artmdv_webapi.Areas.v2.Models
                 Tags = Tags,
                 Date = Date,
                 Annotation = Annotation,
-                Inverted = Inverted
+                Inverted = Inverted,
+                Revisions = Revisions
             };
             return image;
         }
@@ -47,7 +50,8 @@ namespace artmdv_webapi.Areas.v2.Models
                 Tags = image.Tags,
                 Date = image.Date,
                 Annotation = image.Annotation,
-                Inverted = image.Inverted
+                Inverted = image.Inverted,
+                Revisions = image.Revisions
             };
             return vm;
         }

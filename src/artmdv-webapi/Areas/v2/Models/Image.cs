@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using System.Collections.Generic;
+using MongoDB.Bson;
 
 namespace artmdv_webapi.Areas.v2.Models
 {
@@ -14,6 +15,7 @@ namespace artmdv_webapi.Areas.v2.Models
         public string Annotation { get; set; }
         public string Inverted { get; set; }
         public string[] Tags { get; set; }
+        public IList<Revision> Revisions { get; set; }
 
         public string Date { get; set; }
     }

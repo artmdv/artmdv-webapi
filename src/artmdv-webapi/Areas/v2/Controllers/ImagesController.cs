@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -74,23 +75,58 @@ namespace artmdv_webapi.Areas.v2.Controllers
             return null;
         }
 
-        [HttpGet]
-        [Route("TestFile")]
-        public string TestFile()
+        [HttpPost]
+        [Route("Revision")]
+        public dynamic ImageRevision(ImageRevisionDto model)
         {
             try
             {
-                var logPath = System.IO.Path.GetTempFileName();
-                var logFile = System.IO.File.Create(logPath);
-                var logWriter = new System.IO.StreamWriter(logFile);
-                logWriter.WriteLine("Log message");
-                logWriter.Dispose();
-                return "amazing";
+                CheckPassword(model?.password);
+                if (model?.file?.Length > 0 && !string.IsNullOrWhiteSpace(model.imageId))
+                {
+                    var fileName = ContentDispositionHeaderValue
+                       .Parse(model.file.ContentDisposition)
+                       .FileName
+                       .Trim('"');
+
+                    var dataAcces = new ImageDataAccess();
+
+                    var fileStream = model.file.OpenReadStream();
+
+                    var revision = new Revision
+                    {
+                        Description = model.description,
+                        RevisionDate = DateTime.Now,
+                        Thumb = new Thumbnail
+                        {
+                            Filename = $"thumb_{fileName}"
+                        },
+                        Filename = fileName
+                    };
+                    var thumbStream = new MemoryStream();
+                    fileStream.CopyTo(thumbStream);
+                    var thumb = GenerateThumbnail(thumbStream);
+                    var thumbId = dataAcces.CreateThumb(revision.Thumb.Filename, thumb);
+                    revision.Thumb.ContentId = thumbId;
+                    revision.ContentId = dataAcces.CreateImage(fileStream, fileName);
+                    revision.RevisionId = Guid.NewGuid().ToString();
+                    
+                    var image = dataAcces.Get(model.imageId);
+                    if (image.Revisions == null)
+                    {
+                        image.Revisions = new List<Revision>().ToArray();
+                    }
+                    image.Revisions.Add(revision);
+
+                    return dataAcces.Update(image);
+                }
             }
+
             catch (Exception ex)
             {
                 return ex.Message;
             }
+            return null;
         }
 
         [HttpPut]
@@ -149,6 +185,18 @@ namespace artmdv_webapi.Areas.v2.Controllers
             }
 
 
+            var revisions = new List<RevisionPaths>();
+            if (image.Revisions != null)
+            {
+                foreach (var revision in image?.Revisions)
+                {
+                    var revisionRelativePath = dataAcces.GetRevisionPath(revision);
+                    var revisionImagePath = revisionRelativePath != null ? $"{host}/{revisionRelativePath}" : Url.Link("ContentIdRoute", new { id = revision.ContentId });
+                    var revisionThumbPath = Url.Link("ContentIdRoute", new {id = revision.Thumb.ContentId});
+                    revisions.Add(new RevisionPaths {Thumb = revisionThumbPath, Image = revisionImagePath});
+                }
+            }
+
             var result = new
             {
                 Image = ImageViewModel.ToViewModel(image),
@@ -157,7 +205,8 @@ namespace artmdv_webapi.Areas.v2.Controllers
                     ImageContent = imagePath,
                     ThumbnailContent = thumbPath,
                     AnnotationContent = annotationPath,
-                    InvertedContent = invertedPath
+                    InvertedContent = invertedPath,
+                    Revisions = revisions
                 },
                 ForumPost = $"[url={Url.Link("ImageContentRoute", new { image.Id })}][img]{Url.Link("ThumbContentRoute", new { image.Id })}[/img][/url]"
             };
@@ -187,6 +236,15 @@ namespace artmdv_webapi.Areas.v2.Controllers
                 var dataAcces = new ImageDataAccess();
                 var image = dataAcces.GetImageContent(id);
                 return new FileStreamResult(image, "image/jpeg");
+        }
+
+        [HttpGet]
+        [Route("Content/{id}", Name = "ContentIdRoute")]
+        public ActionResult GetContentById(string id)
+        {
+            var dataAcces = new ImageDataAccess();
+            var image = dataAcces.GetByContentId(id);
+            return new FileStreamResult(image, "image/jpeg");
         }
 
         [Route("{id}/Thumbnail", Name = "ThumbContentRoute")]
@@ -244,9 +302,23 @@ namespace artmdv_webapi.Areas.v2.Controllers
         }
     }
 
+    public class RevisionPaths
+    {
+        public string Thumb { get; set; }
+        public string Image { get; set; }
+    }
+
     public class ImageUpdateDto
     {
         public ImageViewModel image { get; set; }
+        public string password { get; set; }
+    }
+
+    public class ImageRevisionDto
+    {
+        public string imageId { get; set; }
+        public IFormFile file { get; set; }
+        public string description { get; set; }
         public string password { get; set; }
     }
 

@@ -46,8 +46,8 @@ namespace artmdv_webapi.Areas.v2.DataAccess
             imagecontent.Position = 0;
             var imageId = GridFs.UploadFromStream(image.Filename, imagecontent);
             image.ContentId = imageId.ToString();
-            thumbContent.Position = 0;
-            var thumbId = GridFs.UploadFromStream(image.Thumb.Filename, thumbContent);
+
+            var thumbId = CreateThumb(image.Thumb.Filename, thumbContent);
             image.Thumb.ContentId = thumbId.ToString();
             image.Id = ObjectId.GenerateNewId(DateTime.Now);
             Collection.InsertOne(image);
@@ -58,6 +58,26 @@ namespace artmdv_webapi.Areas.v2.DataAccess
                 imagecontent.CopyTo(fileStream);
             }
             return image.Id.ToString();
+        }
+
+        public string CreateImage(Stream imageContent, string fileName)
+        {
+            imageContent.Position = 0;
+            var imageId = GridFs.UploadFromStream(fileName, imageContent);
+
+            using (var fileStream = File.Create($"{ImageDirectory}/{imageId}{Path.GetExtension(fileName)}"))
+            {
+                imageContent.Position = 0;
+                imageContent.CopyTo(fileStream);
+            }
+
+            return imageId.ToString();
+        }
+
+        public string CreateThumb(string filename, Stream thumbContent)
+        {
+            thumbContent.Position = 0;
+            return GridFs.UploadFromStream(filename, thumbContent).ToString();
         }
 
         public Image Update(Image image)
@@ -92,6 +112,14 @@ namespace artmdv_webapi.Areas.v2.DataAccess
 
             var content = new MemoryStream();
             GridFs.DownloadToStream(ObjectId.Parse(image.Thumb.ContentId), content);
+            content.Position = 0;
+            return content;
+        }
+
+        public Stream GetByContentId(string id)
+        {
+            var content = new MemoryStream();
+            GridFs.DownloadToStream(ObjectId.Parse(id), content);
             content.Position = 0;
             return content;
         }
@@ -162,6 +190,17 @@ namespace artmdv_webapi.Areas.v2.DataAccess
         {
             var invertedImage = Get(image.Inverted);
             return GetPath(invertedImage);
+        }
+
+        public string GetRevisionPath(Revision image)
+        {
+            if (image == null)
+                return null;
+            if (File.Exists($"{ImageDirectory}/{image.ContentId}{Path.GetExtension(image.Filename)}"))
+            {
+                return $"Images/{image.ContentId}{Path.GetExtension(image.Filename)}";
+            }
+            return null;
         }
     }
 }
