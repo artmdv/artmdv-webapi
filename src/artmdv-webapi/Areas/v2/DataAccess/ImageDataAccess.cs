@@ -101,6 +101,9 @@ namespace artmdv_webapi.Areas.v2.DataAccess
         {
             if (string.IsNullOrEmpty(id))
                 return null;
+            var objId = new ObjectId();
+            if (!ObjectId.TryParse(id, out objId))
+                return null;
             var builder = Builders<Image>.Filter;
             var filter = builder.Eq("_id", ObjectId.Parse(id));
             return Collection.Find(filter).FirstOrDefault();
@@ -108,6 +111,9 @@ namespace artmdv_webapi.Areas.v2.DataAccess
 
         public Stream GetThumbContent(string id)
         {
+            var objId = new ObjectId();
+            if (!ObjectId.TryParse(id, out objId))
+                return null;
             var image = Get(id);
 
             var content = new MemoryStream();
@@ -118,6 +124,9 @@ namespace artmdv_webapi.Areas.v2.DataAccess
 
         public Stream GetByContentId(string id)
         {
+            var objId = new ObjectId();
+            if (!ObjectId.TryParse(id, out objId))
+                return null;
             var content = new MemoryStream();
             GridFs.DownloadToStream(ObjectId.Parse(id), content);
             content.Position = 0;
@@ -127,6 +136,10 @@ namespace artmdv_webapi.Areas.v2.DataAccess
         public Stream GetImageContent(string id)
         {
             if (string.IsNullOrEmpty(id))
+                return null;
+
+            var objId = new ObjectId();
+            if (!ObjectId.TryParse(id, out objId))
                 return null;
             var image = Get(id);
 

@@ -137,6 +137,8 @@ namespace artmdv_webapi.Areas.v2.Controllers
             if (imageVm?.image != null)
             {
                 var image = imageVm.image.ToImage();
+                var originalImage = dataAcces.Get(image.Id.ToString());
+                image.Revisions = originalImage.Revisions;
                 return dataAcces.Update(image);
             }
             return null;
