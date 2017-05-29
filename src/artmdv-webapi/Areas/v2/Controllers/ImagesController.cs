@@ -114,7 +114,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
                     var image = dataAcces.Get(model.imageId);
                     if (image.Revisions == null)
                     {
-                        image.Revisions = new List<Revision>().ToArray();
+                        image.Revisions = new List<Revision>();
                     }
                     image.Revisions.Add(revision);
 
