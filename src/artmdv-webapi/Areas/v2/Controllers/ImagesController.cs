@@ -158,10 +158,10 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [Route("{id}")]
         public dynamic GetImage(string id)
         {
-                var dataAcces = new ImageDataAccess();
-                var image = dataAcces.Get(id);
+            var dataAcces = new ImageDataAccess();
+            var image = dataAcces.Get(id);
 
-                return DecorateImage(image);
+            return DecorateImage(image);
         }
 
         private dynamic DecorateImage(Image image)
@@ -196,7 +196,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
                     var revisionRelativePath = dataAcces.GetRevisionPath(revision);
                     var revisionImagePath = revisionRelativePath != null ? $"{host}/{revisionRelativePath}" : Url.Link("ContentIdRoute", new { id = revision.ContentId });
                     var revisionThumbPath = Url.Link("ContentIdRoute", new {id = revision.Thumb.ContentId});
-                    revisions.Add(new RevisionPaths {Thumb = revisionThumbPath, Image = revisionImagePath, date = revision.RevisionDate.ToString("yyyy-MM-dd HH:mm:ss")});
+                    revisions.Add(new RevisionPaths {Thumb = revisionThumbPath, Image = revisionImagePath, date = revision.RevisionDate.ToString("yyyy-MM-dd HH:mm:ss"), description = revision.Description});
                 }
             }
 
@@ -236,9 +236,9 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [Route("{id}/Content", Name = "ImageContentRoute")]
         public ActionResult GetImageContent(string id)
         {
-                var dataAcces = new ImageDataAccess();
-                var image = dataAcces.GetImageContent(id);
-                return new FileStreamResult(image, "image/jpeg");
+            var dataAcces = new ImageDataAccess();
+            var image = dataAcces.GetImageContent(id);
+            return new FileStreamResult(image, "image/jpeg");
         }
 
         [HttpGet]
@@ -310,6 +310,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
         public string Thumb { get; set; }
         public string Image { get; set; }
         public string date { get; set; }
+        public string description { get; set; }
     }
 
     public class ImageUpdateDto
