@@ -184,16 +184,17 @@ namespace artmdv_webapi.Areas.v2.Controllers
                 invertedPath = invertedRelativePath != null ? $"{host}/{invertedRelativePath}" : Url.Link("InvertedContentRoute", new { image.Id });
             }
 
-
+            
             var revisions = new List<RevisionPaths>();
             if (image.Revisions != null)
             {
+                image.Revisions = image.Revisions.OrderBy(x => x.RevisionDate).ToList();
                 foreach (var revision in image?.Revisions)
                 {
                     var revisionRelativePath = dataAcces.GetRevisionPath(revision);
                     var revisionImagePath = revisionRelativePath != null ? $"{host}/{revisionRelativePath}" : Url.Link("ContentIdRoute", new { id = revision.ContentId });
                     var revisionThumbPath = Url.Link("ContentIdRoute", new {id = revision.Thumb.ContentId});
-                    revisions.Add(new RevisionPaths {Thumb = revisionThumbPath, Image = revisionImagePath});
+                    revisions.Add(new RevisionPaths {Thumb = revisionThumbPath, Image = revisionImagePath, date = revision.RevisionDate.ToString("yyyy-MM-dd HH:mm:ss")});
                 }
             }
 
@@ -306,6 +307,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
     {
         public string Thumb { get; set; }
         public string Image { get; set; }
+        public string date { get; set; }
     }
 
     public class ImageUpdateDto
