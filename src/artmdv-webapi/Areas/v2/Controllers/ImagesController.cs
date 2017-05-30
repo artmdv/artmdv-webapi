@@ -154,6 +154,27 @@ namespace artmdv_webapi.Areas.v2.Controllers
             return null;
         }
 
+        [HttpDelete]
+        [Route("{id}/revision/{revisionId}/{password}")]
+        public dynamic DeleteRevision(string password, string id, string revisionId)
+        {
+            try
+            { 
+                CheckPassword(password);
+                var dataAcces = new ImageDataAccess();
+                var image = dataAcces.Get(id);
+                image.Revisions.Remove(image.Revisions.Single(x => x.RevisionId == revisionId));
+                dataAcces.Update(image);
+                return null;
+            }
+
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
+
+
         [HttpGet]
         [Route("{id}")]
         public dynamic GetImage(string id)
@@ -196,7 +217,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
                     var revisionRelativePath = dataAcces.GetRevisionPath(revision);
                     var revisionImagePath = revisionRelativePath != null ? $"{host}/{revisionRelativePath}" : Url.Link("ContentIdRoute", new { id = revision.ContentId });
                     var revisionThumbPath = Url.Link("ContentIdRoute", new {id = revision.Thumb.ContentId});
-                    revisions.Add(new RevisionPaths {Thumb = revisionThumbPath, Image = revisionImagePath, date = revision.RevisionDate.ToString("yyyy-MM-dd HH:mm:ss"), description = revision.Description});
+                    revisions.Add(new RevisionPaths { id = revision.RevisionId, Thumb = revisionThumbPath, Image = revisionImagePath, date = revision.RevisionDate.ToString("yyyy-MM-dd HH:mm:ss"), description = revision.Description});
                 }
             }
 
@@ -311,6 +332,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
         public string Image { get; set; }
         public string date { get; set; }
         public string description { get; set; }
+        public string id { get; set; }
     }
 
     public class ImageUpdateDto
