@@ -12,6 +12,8 @@ namespace WebApi.Tests
         [Test]
         public void GetContentReturnsContent()
         {
+//            var controller = new ImagesController();
+//            controller.GetImageContent();
             Assert.IsTrue(true);
         }
     }

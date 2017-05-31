@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using artmdv_webapi.Areas.v2.DataAccess;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -29,6 +30,7 @@ namespace artmdv_webapi2
             // Add framework services.
             services.AddMvc();
             services.AddCors(x => x.AddPolicy("default", y => y.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
+            services.AddSingleton<IImageDataAccess, ImageDataAccess>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -36,7 +38,7 @@ namespace artmdv_webapi2
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-
+            
             app.UseStaticFiles();
 
             app.UseStaticFiles(new StaticFileOptions()

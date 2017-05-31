@@ -23,8 +23,11 @@ namespace artmdv_webapi.Areas.v2.Controllers
     [EnableCors("default")]
     public class ImagesController : Controller
     {
-        public ImagesController()
+        private IImageDataAccess DataAccess { get; set; }
+
+        public ImagesController(IImageDataAccess dataAccess)
         {
+            DataAccess = dataAccess;
         }
 
         [HttpPost]
@@ -39,9 +42,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
                     var fileName = ContentDispositionHeaderValue
                         .Parse(model.file.ContentDisposition)
                         .FileName
-                        .Trim('"'); 
-
-                    var dataAcces = new ImageDataAccess();
+                        .Trim('"');
 
                     var fileStream = model.file.OpenReadStream();
 
@@ -63,7 +64,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
                     fileStream.CopyTo(thumbStream);
                     var thumb = GenerateThumbnail(thumbStream);
 
-                    var imageId = dataAcces.Create(image, fileStream, thumb);
+                    var imageId = DataAccess.Create(image, fileStream, thumb);
 
                     return GetImage(imageId.ToString());
                 }
@@ -85,11 +86,9 @@ namespace artmdv_webapi.Areas.v2.Controllers
                 if (model?.file?.Length > 0 && !string.IsNullOrWhiteSpace(model.imageId))
                 {
                     var fileName = ContentDispositionHeaderValue
-                       .Parse(model.file.ContentDisposition)
-                       .FileName
-                       .Trim('"');
-
-                    var dataAcces = new ImageDataAccess();
+                        .Parse(model.file.ContentDisposition)
+                        .FileName
+                        .Trim('"');
 
                     var fileStream = model.file.OpenReadStream();
 
@@ -106,19 +105,19 @@ namespace artmdv_webapi.Areas.v2.Controllers
                     var thumbStream = new MemoryStream();
                     fileStream.CopyTo(thumbStream);
                     var thumb = GenerateThumbnail(thumbStream);
-                    var thumbId = dataAcces.CreateThumb(revision.Thumb.Filename, thumb);
+                    var thumbId = DataAccess.CreateThumb(revision.Thumb.Filename, thumb);
                     revision.Thumb.ContentId = thumbId;
-                    revision.ContentId = dataAcces.CreateImage(fileStream, fileName);
+                    revision.ContentId = DataAccess.CreateImage(fileStream, fileName);
                     revision.RevisionId = Guid.NewGuid().ToString();
-                    
-                    var image = dataAcces.Get(model.imageId);
+
+                    var image = DataAccess.Get(model.imageId);
                     if (image.Revisions == null)
                     {
                         image.Revisions = new List<Revision>();
                     }
                     image.Revisions.Add(revision);
 
-                    return dataAcces.Update(image);
+                    return DataAccess.Update(image);
                 }
             }
 
@@ -130,16 +129,15 @@ namespace artmdv_webapi.Areas.v2.Controllers
         }
 
         [HttpPut]
-        public dynamic UpdateImage([FromBody]ImageUpdateDto imageVm)
+        public dynamic UpdateImage([FromBody] ImageUpdateDto imageVm)
         {
             CheckPassword(imageVm?.password);
-            var dataAcces = new ImageDataAccess();
             if (imageVm?.image != null)
             {
                 var image = imageVm.image.ToImage();
-                var originalImage = dataAcces.Get(image.Id.ToString());
+                var originalImage = DataAccess.Get(image.Id.ToString());
                 image.Revisions = originalImage.Revisions;
-                return dataAcces.Update(image);
+                return DataAccess.Update(image);
             }
             return null;
         }
@@ -149,8 +147,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
         public dynamic DeleteImage(string password, string id)
         {
             CheckPassword(password);
-            var dataAcces = new ImageDataAccess();
-            dataAcces.Delete(id);
+            DataAccess.Delete(id);
             return null;
         }
 
@@ -159,12 +156,11 @@ namespace artmdv_webapi.Areas.v2.Controllers
         public dynamic DeleteRevision(string password, string id, string revisionId)
         {
             try
-            { 
+            {
                 CheckPassword(password);
-                var dataAcces = new ImageDataAccess();
-                var image = dataAcces.Get(id);
+                var image = DataAccess.Get(id);
                 image.Revisions.Remove(image.Revisions.Single(x => x.RevisionId == revisionId));
-                dataAcces.Update(image);
+                DataAccess.Update(image);
                 return null;
             }
 
@@ -179,8 +175,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [Route("{id}")]
         public dynamic GetImage(string id)
         {
-            var dataAcces = new ImageDataAccess();
-            var image = dataAcces.Get(id);
+            var image = DataAccess.Get(id);
 
             return DecorateImage(image);
         }
@@ -189,35 +184,49 @@ namespace artmdv_webapi.Areas.v2.Controllers
         {
             var uri = new Uri(Request.GetDisplayUrl());
             var host = uri.AbsoluteUri.Replace(uri.LocalPath, "");
-            var dataAcces = new ImageDataAccess();
-            var imageRelativePath = dataAcces.GetPath(image);
-            var imagePath = imageRelativePath != null ? $"{host}/{imageRelativePath}" : Url.Link("ImageContentRoute", new {image.Id});
-            
-            var thumbPath = Url.Link("ThumbContentRoute", new { image.Id });
+            var imageRelativePath = DataAccess.GetPath(image);
+            var imagePath = imageRelativePath != null
+                ? $"{host}/{imageRelativePath}"
+                : Url.Link("ImageContentRoute", new {image.Id});
+
+            var thumbPath = Url.Link("ThumbContentRoute", new {image.Id});
             var annotationPath = "";
             var invertedPath = "";
             if (!string.IsNullOrEmpty(image.Annotation))
             {
-                var annotationRelativePath = dataAcces.GetAnnotationPath(image);
-                annotationPath = annotationRelativePath != null ? $"{host}/{annotationRelativePath}" : Url.Link("AnnotationContentRoute", new {image.Id});
+                var annotationRelativePath = DataAccess.GetAnnotationPath(image);
+                annotationPath = annotationRelativePath != null
+                    ? $"{host}/{annotationRelativePath}"
+                    : Url.Link("AnnotationContentRoute", new {image.Id});
             }
             if (!string.IsNullOrEmpty(image.Inverted))
             {
-                var invertedRelativePath = dataAcces.GetInvertedPath(image);
-                invertedPath = invertedRelativePath != null ? $"{host}/{invertedRelativePath}" : Url.Link("InvertedContentRoute", new { image.Id });
+                var invertedRelativePath = DataAccess.GetInvertedPath(image);
+                invertedPath = invertedRelativePath != null
+                    ? $"{host}/{invertedRelativePath}"
+                    : Url.Link("InvertedContentRoute", new {image.Id});
             }
 
-            
+
             var revisions = new List<RevisionPaths>();
             if (image.Revisions != null)
             {
                 image.Revisions = image.Revisions.OrderBy(x => x.RevisionDate).ToList();
                 foreach (var revision in image?.Revisions)
                 {
-                    var revisionRelativePath = dataAcces.GetRevisionPath(revision);
-                    var revisionImagePath = revisionRelativePath != null ? $"{host}/{revisionRelativePath}" : Url.Link("ContentIdRoute", new { id = revision.ContentId });
+                    var revisionRelativePath = DataAccess.GetRevisionPath(revision);
+                    var revisionImagePath = revisionRelativePath != null
+                        ? $"{host}/{revisionRelativePath}"
+                        : Url.Link("ContentIdRoute", new {id = revision.ContentId});
                     var revisionThumbPath = Url.Link("ContentIdRoute", new {id = revision.Thumb.ContentId});
-                    revisions.Add(new RevisionPaths { id = revision.RevisionId, Thumb = revisionThumbPath, Image = revisionImagePath, date = revision.RevisionDate.ToString("yyyy-MM-dd HH:mm:ss"), description = revision.Description});
+                    revisions.Add(new RevisionPaths
+                    {
+                        id = revision.RevisionId,
+                        Thumb = revisionThumbPath,
+                        Image = revisionImagePath,
+                        date = revision.RevisionDate.ToString("yyyy-MM-dd HH:mm:ss"),
+                        description = revision.Description
+                    });
                 }
             }
 
@@ -232,33 +241,32 @@ namespace artmdv_webapi.Areas.v2.Controllers
                     InvertedContent = invertedPath,
                     Revisions = revisions
                 },
-                ForumPost = $"[url={Url.Link("ImageContentRoute", new { image.Id })}][img]{Url.Link("ThumbContentRoute", new { image.Id })}[/img][/url]"
+                ForumPost =
+                $"[url={Url.Link("ImageContentRoute", new {image.Id})}][img]{Url.Link("ThumbContentRoute", new {image.Id})}[/img][/url]"
             };
             return result;
         }
 
         [HttpGet]
-        public async Task<dynamic> Getall(string tag=null)
+        public async Task<dynamic> Getall(string tag = null)
         {
-                if (tag == "all")
-                {
-                    tag = string.Empty;
-                }
-                tag = tag ?? string.Empty;
-                var dataAcces = new ImageDataAccess();
-                var images = await dataAcces.GetAllByTag(tag);
+            if (tag == "all")
+            {
+                tag = string.Empty;
+            }
+            tag = tag ?? string.Empty;
+            var images = await DataAccess.GetAllByTag(tag);
 
-                images = images.OrderByDescending(x => x.Date).ToList();
+            images = images.OrderByDescending(x => x.Date).ToList();
 
-                return images.Select(image => DecorateImage(image)).ToList();
+            return images.Select(image => DecorateImage(image)).ToList();
         }
 
         [HttpGet]
         [Route("{id}/Content", Name = "ImageContentRoute")]
         public ActionResult GetImageContent(string id)
         {
-            var dataAcces = new ImageDataAccess();
-            var image = dataAcces.GetImageContent(id);
+            var image = DataAccess.GetImageContent(id);
             return new FileStreamResult(image, "image/jpeg");
         }
 
@@ -266,37 +274,33 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [Route("Content/{id}", Name = "ContentIdRoute")]
         public ActionResult GetContentById(string id)
         {
-            var dataAcces = new ImageDataAccess();
-            var image = dataAcces.GetByContentId(id);
+            var image = DataAccess.GetByContentId(id);
             return new FileStreamResult(image, "image/jpeg");
         }
 
         [Route("{id}/Thumbnail", Name = "ThumbContentRoute")]
         public ActionResult GetThumb(string id)
         {
-                var dataAcces = new ImageDataAccess();
-                var image = dataAcces.GetThumbContent(id);
-                return new FileStreamResult(image, "image/jpeg");
+            var image = DataAccess.GetThumbContent(id);
+            return new FileStreamResult(image, "image/jpeg");
         }
 
         [Route("{id}/Annotation", Name = "AnnotationContentRoute")]
         public ActionResult GetAnnotation(string id)
         {
-                var dataAcces = new ImageDataAccess();
-                var image = dataAcces.GetAnnotationContent(id);
-                if (image == null)
-                    return null;
-                return new FileStreamResult(image, "image/jpeg");
+            var image = DataAccess.GetAnnotationContent(id);
+            if (image == null)
+                return null;
+            return new FileStreamResult(image, "image/jpeg");
         }
 
         [Route("{id}/Inverted", Name = "InvertedContentRoute")]
         public ActionResult GetInverted(string id)
         {
-                var dataAcces = new ImageDataAccess();
-                var image = dataAcces.GetInvertedContent(id);
-                if (image == null)
-                    return null;
-                return new FileStreamResult(image, "image/jpeg");
+            var image = DataAccess.GetInvertedContent(id);
+            if (image == null)
+                return null;
+            return new FileStreamResult(image, "image/jpeg");
         }
 
         private Stream GenerateThumbnail(MemoryStream image)
@@ -304,7 +308,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
             image.Position = 0;
             var resizedStream = new MemoryStream();
             var thumb = new ImageProcessorCore.Image(image);
-            thumb.Resize(400, thumb.Height*400/thumb.Width).Save(resizedStream);
+            thumb.Resize(400, thumb.Height * 400 / thumb.Width).Save(resizedStream);
             resizedStream.Position = 0;
             return resizedStream;
         }
