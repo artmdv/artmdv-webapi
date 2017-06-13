@@ -40,8 +40,7 @@ namespace artmdv_webapi2
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-
-            app.UseMiddleware<EndpointMonitoringMiddleware>();
+            
             app.UseStaticFiles();
 
             app.UseStaticFiles(new StaticFileOptions()
@@ -52,6 +51,7 @@ namespace artmdv_webapi2
             });
 
             // Add MVC to the request pipeline.
+            app.UseMiddleware<EndpointMonitoringMiddleware>();
             app.UseMvc(routes =>
             {
                 routes.MapRoute(name: "areaRoute",
@@ -69,6 +69,7 @@ namespace artmdv_webapi2
             app.UseCors("default");
 
             app.UseMvc();
+
 
             if (env.IsDevelopment())
             {

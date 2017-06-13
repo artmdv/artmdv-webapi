@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Routing;
 using StatsdClient;
 
 namespace artmdv_webapi.Middleware
@@ -20,14 +16,21 @@ namespace artmdv_webapi.Middleware
 
         public async Task Invoke(HttpContext context)
         {
-            var request = context.Request;
-            var path = $"{request.Method}{request.Path.ToString().Replace("/", ".")}";
-                
-            using (Metrics.StartTimer(path))
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            await _next(context).ConfigureAwait(false);
+            stopwatch.Stop();
+            
+            var routeData = context.GetRouteData();
+            if (routeData != null)
             {
-                await _next(context).ConfigureAwait(false);
+                var path = $"{routeData.Values["area"]}.{routeData.Values["controller"]}.{routeData.Values["action"]}";
+                Metrics.Timer(path, stopwatch.ElapsedMilliseconds);
+            }
+            else
+            {
+                Metrics.Counter("Errors.RouteDataNotFound");
             }
         }
-
     }
 }
