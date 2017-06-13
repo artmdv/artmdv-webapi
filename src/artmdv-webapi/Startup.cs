@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using artmdv_webapi.Areas.v2.DataAccess;
+using artmdv_webapi.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
+using StatsdClient;
 
 namespace artmdv_webapi2
 {
@@ -38,7 +40,8 @@ namespace artmdv_webapi2
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-            
+
+            app.UseMiddleware<EndpointMonitoringMiddleware>();
             app.UseStaticFiles();
 
             app.UseStaticFiles(new StaticFileOptions()
@@ -66,6 +69,23 @@ namespace artmdv_webapi2
             app.UseCors("default");
 
             app.UseMvc();
+
+            if (env.IsDevelopment())
+            {
+                Metrics.Configure(new MetricsConfig
+                {
+                    Prefix = "Development",
+                    StatsdServerName = "arturas.space"
+                });
+            }
+            else
+            {
+                Metrics.Configure(new MetricsConfig
+                {
+                    Prefix = "Production",
+                    StatsdServerName = "localhost"
+                });
+            }
         }
     }
 }

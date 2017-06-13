@@ -43,6 +43,7 @@
     <PackageReference Include="MongoDB.Driver.GridFS" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="1.1.2" />
     <PackageReference Include="ChyImageProcessorCore" Version="1.0.0-alpha1031" />
+    <PackageReference Include="StatsdClient" Version="3.0.86" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.3.0" />
   </ItemGroup>
 
