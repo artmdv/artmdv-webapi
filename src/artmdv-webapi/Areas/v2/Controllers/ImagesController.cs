@@ -31,7 +31,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
         }
 
         [HttpPost]
-        public dynamic UploadImage(ImageUploadDto model)
+        public ImageResponse UploadImage(ImageUploadDto model)
         {
             try
             {
@@ -71,7 +71,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
             }
             catch (Exception ex)
             {
-                return ex.Message;
+                throw ex;
             }
             return null;
         }
@@ -173,14 +173,14 @@ namespace artmdv_webapi.Areas.v2.Controllers
 
         [HttpGet]
         [Route("{id}")]
-        public dynamic GetImage(string id)
+        public ImageResponse GetImage(string id)
         {
             var image = DataAccess.Get(id);
 
             return DecorateImage(image);
         }
 
-        private dynamic DecorateImage(Image image)
+        private ImageResponse DecorateImage(Image image)
         {
             var uri = new Uri(Request.GetDisplayUrl());
             var host = uri.AbsoluteUri.Replace(uri.LocalPath, "");
@@ -230,10 +230,10 @@ namespace artmdv_webapi.Areas.v2.Controllers
                 }
             }
 
-            var result = new
+            var result = new ImageResponse
             {
                 Image = ImageViewModel.ToViewModel(image),
-                links = new
+                links = new Links
                 {
                     ImageContent = imagePath,
                     ThumbnailContent = thumbPath,
@@ -255,7 +255,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
                 tag = string.Empty;
             }
             tag = tag ?? string.Empty;
-            var images = await DataAccess.GetAllByTag(tag);
+            var images = await DataAccess.GetAllByTag(tag).ConfigureAwait(false);
 
             images = images.OrderByDescending(x => x.Date).ToList();
 
