@@ -34,12 +34,13 @@ namespace WebApi.Tests
             };
             var savedImage = await UploadNewImage(image.title, image.description, image.tags, image.date, image.annotation, image.inverted, image.password, imageBase64).ConfigureAwait(false);
             
-            var imageJson = @"{""image"":{""id"":""594184f5296ae125f09b026c"",""type"":0,""filename"":""testImage.png"",""contentId"":""594184f5296ae125f09b0268"",""description"":""Image test description"",""title"":""Image test"",""thumb"":{""type"":1,""filename"":""thumb_testImage.png"",""contentId"":""594184f5296ae125f09b026a""},""annotation"":""594184c9296ae125f09b0262"",""inverted"":""594184dc296ae125f09b0267"",""tags"":[""image""],""date"":""2017-06-14"",""revisions"":[{""revisionDate"":""2017-06-14T18:48:39.238Z"",""revisionId"":""3c24d5b7-3ff1-4e4c-864b-d297012034d6"",""filename"":""testImageRevision.png"",""contentId"":""59418507296ae125f09b026f"",""thumb"":{""type"":1,""filename"":""thumb_testImageRevision.png"",""contentId"":""59418507296ae125f09b026d""},""description"":""Revision test""}]},""links"":{""imageContent"":""http://localhost:5004/Images/594184f5296ae125f09b026c.png"",""thumbnailContent"":""http://localhost:5004/v2/Images/594184f5296ae125f09b026c/Thumbnail"",""annotationContent"":""http://localhost:5004/Images/594184c9296ae125f09b0262.png"",""invertedContent"":""http://localhost:5004/Images/594184dc296ae125f09b0267.png"",""revisions"":[{""thumb"":""http://localhost:5004/v2/Images/Content/59418507296ae125f09b026d"",""image"":""http://localhost:5004/Images/59418507296ae125f09b026f.png"",""date"":""2017-06-14 18:48:39"",""description"":""Revision test"",""id"":""3c24d5b7-3ff1-4e4c-864b-d297012034d6""}]},""forumPost"":""[url=http://localhost:5004/v2/Images/594184f5296ae125f09b026c/Content][img]http://localhost:5004/v2/Images/594184f5296ae125f09b026c/Thumbnail[/img][/url]""}";
-            
             var response = await _httpClient.GetAsync($"v2/Images/{savedImage.Image.Id}").ConfigureAwait(false);
             var responseJson = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var responseImage = JsonConvert.DeserializeObject<ImageResponse>(responseJson);
 
-            Assert.AreEqual(imageJson, responseJson);
+            Assert.AreEqual(responseImage.Image.Title, image.title);
+            
+            await DeleteImage(responseImage.Image.Id).ConfigureAwait(false);
         }
 
         [Test]
@@ -108,6 +109,11 @@ namespace WebApi.Tests
             var response = await _httpClient.PostAsync("v2/Images", content).ConfigureAwait(false);
             var stringResponse = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             return JsonConvert.DeserializeObject<ImageResponse>(stringResponse);
+        }
+
+        private async Task DeleteImage(string id)
+        {
+            await _httpClient.DeleteAsync($"v2/Images/{id}/{GetPasswordFromConfig()}").ConfigureAwait(false);
         }
 
         private string GetPasswordFromConfig()
