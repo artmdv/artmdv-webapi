@@ -9,7 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "artmdv-webapi", "src\artmdv-webapi\artmdv-webapi.csproj", "{3ADF6F99-F3B1-49B3-AE70-0AB460A5EF45}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi.Tests", "src\WebApi.Tests\WebApi.Tests.csproj", "{A77EA0E6-E35D-4073-9B6F-DDCFCE3B7C03}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi.Tests", "WebApi.Tests\WebApi.Tests.csproj", "{23DBB8E0-1C17-4BC8-A5E7-41FB6B9FAEA7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,16 +21,15 @@ Global
 		{3ADF6F99-F3B1-49B3-AE70-0AB460A5EF45}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3ADF6F99-F3B1-49B3-AE70-0AB460A5EF45}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3ADF6F99-F3B1-49B3-AE70-0AB460A5EF45}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A77EA0E6-E35D-4073-9B6F-DDCFCE3B7C03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A77EA0E6-E35D-4073-9B6F-DDCFCE3B7C03}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A77EA0E6-E35D-4073-9B6F-DDCFCE3B7C03}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A77EA0E6-E35D-4073-9B6F-DDCFCE3B7C03}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23DBB8E0-1C17-4BC8-A5E7-41FB6B9FAEA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23DBB8E0-1C17-4BC8-A5E7-41FB6B9FAEA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23DBB8E0-1C17-4BC8-A5E7-41FB6B9FAEA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23DBB8E0-1C17-4BC8-A5E7-41FB6B9FAEA7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{3ADF6F99-F3B1-49B3-AE70-0AB460A5EF45} = {4C293149-C889-4256-9CCE-7C3C87DF2AD3}
-		{A77EA0E6-E35D-4073-9B6F-DDCFCE3B7C03} = {4C293149-C889-4256-9CCE-7C3C87DF2AD3}
 	EndGlobalSection
 EndGlobal

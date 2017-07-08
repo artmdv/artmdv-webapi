@@ -10,9 +10,9 @@ using MongoDB.Driver.GridFS;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace artmdv_webapi.Areas.v2.DataAccess
+namespace artmdv_webapi.Areas.v2.Repository
 {
-    public class ImageDataAccess
+    public class ImageRepository : IImageRepository
     {
         private GridFSBucket GridFs { get; set; }
         public IMongoDatabase Database { get; set; }
@@ -20,7 +20,7 @@ namespace artmdv_webapi.Areas.v2.DataAccess
 
         private string ImageDirectory { get; set; }
 
-        internal ImageDataAccess()
+        public ImageRepository()
         {
             var client = new MongoClient("mongodb://localhost:27017");
             Database = client.GetDatabase("v2");
