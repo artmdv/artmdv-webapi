@@ -1,6 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using artmdv_webapi.Areas.v2.Controllers;
 using artmdv_webapi.Areas.v2.Models;
@@ -14,7 +17,7 @@ using JsonConvert = Newtonsoft.Json.JsonConvert;
 
 namespace WebApi.Tests
 {
-    [TestFixture, Explicit]
+    [TestFixture]
     public class IntegrationTests
     {
         private HttpClient _httpClient = new HttpClient {BaseAddress = new Uri("http://localhost:5004")};
@@ -101,15 +104,18 @@ namespace WebApi.Tests
         {
             var password = GetPasswordFromConfig();
             var imageId = ObjectId.GenerateNewId();
-            var postResponse = await _httpClient.PostAsync($"v2/Images/Featured/{imageId}", new StringContent("{\"password\":\"" + password + "\"}")).ConfigureAwait(false);
+            _httpClient.DefaultRequestHeaders
+                .Accept
+                .Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            var postResponse = await _httpClient.PostAsync($"v2/Images/Featured/{imageId}/{password}", new StringContent("")).ConfigureAwait(false);
 
 
             var getResponse = await _httpClient.GetAsync($"v2/Images/Featured").ConfigureAwait(false);
             var json = await getResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var featuredImage = JsonConvert.DeserializeObject<FeaturedImage>(json);
-            Assert.That(postResponse.IsSuccessStatusCode);
-            Assert.That(getResponse.IsSuccessStatusCode);
-            Assert.That(featuredImage.ImageId, Is.EqualTo(imageId));
+            var featuredImage = JsonConvert.DeserializeObject<FeaturedImageViewModel>(json);
+            Assert.That(postResponse.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(getResponse.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(featuredImage.ImageId, Is.EqualTo(imageId.ToString()));
         }
 
         private async Task<ImageResponse> UploadNewImage(string title, string description,string tags, string date, string annotation, string inverted, string password, string file)

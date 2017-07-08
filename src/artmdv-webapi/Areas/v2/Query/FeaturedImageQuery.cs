@@ -3,7 +3,7 @@ using artmdv_webapi.Areas.v2.Repository;
 
 namespace artmdv_webapi.Areas.v2.Query
 {
-    public class FeaturedImageQuery: IQuery<FeaturedImage>
+    public class FeaturedImageQuery: IQuery<FeaturedImageViewModel>
     {
         public IFeaturedImageRepository Repository { get; }
 
@@ -12,9 +12,15 @@ namespace artmdv_webapi.Areas.v2.Query
             Repository = repository;
         }
 
-        public FeaturedImage Get()
+        public FeaturedImageViewModel Get()
         {
-            return Repository.GetLatest();
+            var featuredImage = Repository.GetLatest();
+            return new FeaturedImageViewModel
+            {
+                Date = featuredImage.Date,
+                ImageId = featuredImage.ImageId.ToString()
+            };
+
         }
     }
 }

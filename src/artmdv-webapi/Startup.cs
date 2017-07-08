@@ -1,5 +1,7 @@
 ﻿using System.IO;
 using artmdv_webapi.Areas.v2.Command;
+using artmdv_webapi.Areas.v2.Models;
+using artmdv_webapi.Areas.v2.Query;
 using artmdv_webapi.Areas.v2.Repository;
 using artmdv_webapi.Middleware;
 using Microsoft.AspNetCore.Builder;
@@ -36,6 +38,7 @@ namespace artmdv_webapi2
             services.AddSingleton<IImageRepository, ImageRepository>();
             services.AddTransient<IFeaturedImageRepository, FeaturedImageRepository>();
             services.AddTransient<IHandler<SetFeaturedImageCommand>, SetFeaturedImageHandler>();
+            services.AddTransient<IQuery<FeaturedImageViewModel>, FeaturedImageQuery>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

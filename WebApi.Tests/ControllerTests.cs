@@ -87,7 +87,7 @@ namespace WebApi.Tests
         [Test]
         public void CallingGetFeaturedImageCallsQueryGet()
         {
-            var featuredImageQueryMock = new Mock<IQuery<FeaturedImage>>();
+            var featuredImageQueryMock = new Mock<IQuery<FeaturedImageViewModel>>();
             var controller = new ImagesController(null, featuredImageQueryMock.Object, null);
             
             controller.GetFeaturedImage();

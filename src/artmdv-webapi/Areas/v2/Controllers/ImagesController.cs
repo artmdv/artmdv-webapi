@@ -26,12 +26,14 @@ namespace artmdv_webapi.Areas.v2.Controllers
     public class ImagesController : Controller
     {
         private IImageRepository DataAccess { get; set; }
-        public IQuery<FeaturedImage> FeaturedImageQuery { get; }
+        public IQuery<FeaturedImageViewModel> FeaturedImageQuery { get; }
+        public IHandler<SetFeaturedImageCommand> SetFeaturedImageCommandHandler { get; }
 
-        public ImagesController(IImageRepository dataAccess, IQuery<FeaturedImage> featuredImageQuery, IHandler<SetFeaturedImageCommand> setFeaturedImageCommandHandler)
+        public ImagesController(IImageRepository dataAccess, IQuery<FeaturedImageViewModel> featuredImageQuery, IHandler<SetFeaturedImageCommand> setFeaturedImageCommandHandler)
         {
             DataAccess = dataAccess;
             FeaturedImageQuery = featuredImageQuery;
+            SetFeaturedImageCommandHandler = setFeaturedImageCommandHandler;
         }
 
         [HttpPost]
@@ -341,13 +343,13 @@ namespace artmdv_webapi.Areas.v2.Controllers
             return new OkObjectResult(featuredImage);
         }
 
-        [Route("Featured/{id}")]
+        [Route("Featured/{id}/{password}")]
         [HttpPost]
-        public ActionResult SetFeaturedImage(string id, [FromBody]string password)
+        public ActionResult SetFeaturedImage(string id, string password)
         {
             CheckPassword(password);
             var command = new SetFeaturedImageCommand(id);
-            
+            SetFeaturedImageCommandHandler.Handle(command);
             return new OkResult();
         }
     }

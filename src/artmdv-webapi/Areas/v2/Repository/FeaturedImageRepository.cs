@@ -19,12 +19,13 @@ namespace artmdv_webapi.Areas.v2.Repository
 
         public FeaturedImage GetLatest()
         {
-            return Collection.Find(x => true).SortByDescending(x => x.Date).FirstOrDefault();
+            var image =  Collection.Find(x => true).SortByDescending(x => x.Date).FirstOrDefault();
+            return image;
         }
 
         public void Save(FeaturedImage image)
         {
-            throw new NotImplementedException();
+            Collection.InsertOne(image);
         }
     }
 }
