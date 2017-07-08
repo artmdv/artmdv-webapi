@@ -4,8 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using artmdv_webapi.Areas.v2.DataAccess;
+using artmdv_webapi.Areas.v2.Command;
 using artmdv_webapi.Areas.v2.Models;
+using artmdv_webapi.Areas.v2.Query;
+using artmdv_webapi.Areas.v2.Repository;
 using ImageProcessorCore;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
@@ -23,11 +25,13 @@ namespace artmdv_webapi.Areas.v2.Controllers
     [EnableCors("default")]
     public class ImagesController : Controller
     {
-        private IImageDataAccess DataAccess { get; set; }
+        private IImageRepository DataAccess { get; set; }
+        public IQuery<FeaturedImage> FeaturedImageQuery { get; }
 
-        public ImagesController(IImageDataAccess dataAccess)
+        public ImagesController(IImageRepository dataAccess, IQuery<FeaturedImage> featuredImageQuery, IHandler<SetFeaturedImageCommand> setFeaturedImageCommandHandler)
         {
             DataAccess = dataAccess;
+            FeaturedImageQuery = featuredImageQuery;
         }
 
         [HttpPost]
@@ -327,6 +331,24 @@ namespace artmdv_webapi.Areas.v2.Controllers
                 throw new HttpRequestException();
             }
 
+        }
+
+        [Route("Featured")]
+        [HttpGet]
+        public ActionResult GetFeaturedImage()
+        {
+            var featuredImage = FeaturedImageQuery.Get();
+            return new OkObjectResult(featuredImage);
+        }
+
+        [Route("Featured/{id}")]
+        [HttpPost]
+        public ActionResult SetFeaturedImage(string id, [FromBody]string password)
+        {
+            CheckPassword(password);
+            var command = new SetFeaturedImageCommand(id);
+            
+            return new OkResult();
         }
     }
 

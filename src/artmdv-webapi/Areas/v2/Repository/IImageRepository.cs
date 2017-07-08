@@ -2,14 +2,11 @@
 using System.IO;
 using System.Threading.Tasks;
 using artmdv_webapi.Areas.v2.Models;
-using MongoDB.Driver;
 
-namespace artmdv_webapi.Areas.v2.DataAccess
+namespace artmdv_webapi.Areas.v2.Repository
 {
-    public interface IImageDataAccess
+    public interface IImageRepository: IRepository
     {
-        IMongoDatabase Database { get; set; }
-
         string Create(Image image, Stream imagecontent, Stream thumbContent);
         string CreateImage(Stream imageContent, string fileName);
         string CreateThumb(string filename, Stream thumbContent);

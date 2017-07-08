@@ -1,12 +1,11 @@
 ﻿using System;
 using System.IO;
 using artmdv_webapi.Areas.v2.Controllers;
-using artmdv_webapi.Areas.v2.DataAccess;
 using artmdv_webapi.Areas.v2.Models;
+using artmdv_webapi.Areas.v2.Query;
+using artmdv_webapi.Areas.v2.Repository;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Routing;
 using MongoDB.Bson;
 using Moq;
 using NUnit.Framework;
@@ -19,11 +18,11 @@ namespace WebApi.Tests
         [Test]
         public void CallingImageContentReturnsStream()
         {
-            var dataAccessMock = new Mock<IImageDataAccess>();
+            var dataAccessMock = new Mock<IImageRepository>();
             var stream = new MemoryStream();
             stream.WriteByte(1);
             dataAccessMock.Setup(x => x.GetImageContent(It.IsAny<string>())).Returns(stream);
-            var controller = new ImagesController(dataAccessMock.Object);
+            var controller = new ImagesController(dataAccessMock.Object, null, null);
             var guid = Guid.NewGuid().ToString();
             var result = controller.GetImageContent(guid);
 
@@ -36,11 +35,11 @@ namespace WebApi.Tests
         [Test]
         public void CallingGetAnnotationReturnsStream()
         {
-            var dataAccessMock = new Mock<IImageDataAccess>();
+            var dataAccessMock = new Mock<IImageRepository>();
             var stream = new MemoryStream();
             stream.WriteByte(1);
             dataAccessMock.Setup(x => x.GetAnnotationContent(It.IsAny<string>())).Returns(stream);
-            var controller = new ImagesController(dataAccessMock.Object);
+            var controller = new ImagesController(dataAccessMock.Object, null, null);
             var guid = Guid.NewGuid().ToString();
             var result = controller.GetAnnotation(guid);
 
@@ -51,11 +50,11 @@ namespace WebApi.Tests
         [Test]
         public void CallingGetContentByIdReturnsStream()
         {
-            var dataAccessMock = new Mock<IImageDataAccess>();
+            var dataAccessMock = new Mock<IImageRepository>();
             var stream = new MemoryStream();
             stream.WriteByte(1);
             dataAccessMock.Setup(x => x.GetByContentId(It.IsAny<string>())).Returns(stream);
-            var controller = new ImagesController(dataAccessMock.Object);
+            var controller = new ImagesController(dataAccessMock.Object, null, null);
             var guid = Guid.NewGuid().ToString();
             var result = controller.GetContentById(guid);
 
@@ -66,17 +65,41 @@ namespace WebApi.Tests
         [Test]
         public void CallingGetImageReturnsImageObject()
         {
-            var imagePath = "ImagePath";
-            var host = "testHost";
-            var path = "/testPath";
+            
             var image = new Image { Id = ObjectId.GenerateNewId() };
 
-            var dataAccessMock = new Mock<IImageDataAccess>();
+            var dataAccessMock = new Mock<IImageRepository>();
 
             dataAccessMock.Setup(x => x.Get(It.IsAny<string>())).Returns(image);
             dataAccessMock.Setup(x => x.GetPath(It.IsAny<Image>())).Returns("ImagePath");
 
-            var controller = new ImagesController(dataAccessMock.Object);
+            var controller = new ImagesController(dataAccessMock.Object, null, null);
+            SetupImagePath(controller);
+
+            var guid = Guid.NewGuid().ToString();
+            var result = controller.GetImage(guid);
+
+            //check if its image/jpeg
+            Assert.NotNull(result);
+            Assert.That(result.Image.Id, Is.EqualTo(image.Id.ToString()));
+        }
+
+        [Test]
+        public void CallingGetFeaturedImageCallsQueryGet()
+        {
+            var featuredImageQueryMock = new Mock<IQuery<FeaturedImage>>();
+            var controller = new ImagesController(null, featuredImageQueryMock.Object, null);
+            
+            controller.GetFeaturedImage();
+
+            featuredImageQueryMock.Verify(x=>x.Get());
+        }
+
+        private void SetupImagePath(Controller controller)
+        {
+            var host = "testHost";
+            var path = "/testPath";
+
             controller.ControllerContext = new ControllerContext();
             controller.ControllerContext.HttpContext = new DefaultHttpContext();
             var request = controller.Request;
@@ -86,13 +109,6 @@ namespace WebApi.Tests
             var urlMock = new Mock<IUrlHelper>();
             urlMock.Setup(x => x.Link(It.IsAny<string>(), It.IsAny<object>())).Returns("urlHelperLink");
             controller.Url = urlMock.Object;
-
-            var guid = Guid.NewGuid().ToString();
-            var result = controller.GetImage(guid);
-
-            //check if its image/jpeg
-            Assert.NotNull(result);
-            Assert.That(result.Image.Id, Is.EqualTo(image.Id.ToString()));
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using artmdv_webapi.Areas.v2.Controllers;
 using artmdv_webapi.Areas.v2.Models;
 using Microsoft.AspNetCore.Http.Internal;
+using MongoDB.Bson;
 using MongoDB.Bson.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -13,7 +14,7 @@ using JsonConvert = Newtonsoft.Json.JsonConvert;
 
 namespace WebApi.Tests
 {
-    [TestFixture]
+    [TestFixture, Explicit]
     public class IntegrationTests
     {
         private HttpClient _httpClient = new HttpClient {BaseAddress = new Uri("http://localhost:5004")};
@@ -93,6 +94,22 @@ namespace WebApi.Tests
             var base64response = Convert.ToBase64String(responseBytes);
 
             Assert.AreEqual(imageBase64, base64response);
+        }
+
+        [Test]
+        public async Task GetFeaturedImageReturnsTheOneThatWasSet()
+        {
+            var password = GetPasswordFromConfig();
+            var imageId = ObjectId.GenerateNewId();
+            var postResponse = await _httpClient.PostAsync($"v2/Images/Featured/{imageId}", new StringContent("{\"password\":\"" + password + "\"}")).ConfigureAwait(false);
+
+
+            var getResponse = await _httpClient.GetAsync($"v2/Images/Featured").ConfigureAwait(false);
+            var json = await getResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var featuredImage = JsonConvert.DeserializeObject<FeaturedImage>(json);
+            Assert.That(postResponse.IsSuccessStatusCode);
+            Assert.That(getResponse.IsSuccessStatusCode);
+            Assert.That(featuredImage.ImageId, Is.EqualTo(imageId));
         }
 
         private async Task<ImageResponse> UploadNewImage(string title, string description,string tags, string date, string annotation, string inverted, string password, string file)

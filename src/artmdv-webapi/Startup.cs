@@ -1,5 +1,6 @@
 ﻿using System.IO;
-using artmdv_webapi.Areas.v2.DataAccess;
+using artmdv_webapi.Areas.v2.Command;
+using artmdv_webapi.Areas.v2.Repository;
 using artmdv_webapi.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -32,7 +33,9 @@ namespace artmdv_webapi2
             // Add framework services.
             services.AddMvc();
             services.AddCors(x => x.AddPolicy("default", y => y.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
-            services.AddSingleton<IImageDataAccess, ImageDataAccess>();
+            services.AddSingleton<IImageRepository, ImageRepository>();
+            services.AddTransient<IFeaturedImageRepository, FeaturedImageRepository>();
+            services.AddTransient<IHandler<SetFeaturedImageCommand>, SetFeaturedImageHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
