@@ -64,27 +64,47 @@ namespace WebApi.Tests
         [Test]
         public async Task GetImageContent()
         {
-            var imageId = "594184f5296ae125f09b026c";
             var imageBase64 = "iVBORw0KGgoAAAANSUhEUgAAAZAAAAGQCAYAAACAvzbMAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAFtUlEQVR4nO3XsQ2DUBAFQUBU4nrcrCuEAoi8yYmvmQpedKs7P7/vtQEvsU8PWMPj6jmDxTE9AIB3EhAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIDmnBwD/uKYHrGGfHrAGHwgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICADJDa28CEJQqEfiAAAAAElFTkSuQmCC";
-            
-            var response = await _httpClient.GetAsync($"v2/Images/{imageId}/Thumbnail").ConfigureAwait(false);
+
+            var image = new ImageUploadDto
+            {
+                date = DateTime.Now.Date.ToString(),
+                description = "integrationTestDescription",
+                password = ConfigurationManager.GetPassword(),
+                tags = "integrationTestTag",
+                title = "integrationTestTitle"
+            };
+            var savedImage = await UploadNewImage(image.title, image.description, image.tags, image.date, image.annotation, image.inverted, image.password, imageBase64).ConfigureAwait(false);
+
+            var response = await _httpClient.GetAsync($"v2/Images/{savedImage.Image.Id}/Thumbnail").ConfigureAwait(false);
             var responseBytes = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
             var base64response = Convert.ToBase64String(responseBytes);
 
             Assert.AreEqual(imageBase64, base64response);
+            await DeleteImage(savedImage.Image.Id).ConfigureAwait(false);
         }
 
         [Test]
         public async Task GetImageThumbnail()
         {
-            var imageId = "594184f5296ae125f09b026c";
             var imageBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAIAAAACDbGyAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAhSURBVBhXY1Ta6MMABYwM//8zQdkg8B8ogswHAfx8BgYAD/YEKKaxNAIAAAAASUVORK5CYII=";
-            
-            var response = await _httpClient.GetAsync($"v2/Images/{imageId}/Content").ConfigureAwait(false);
+            var image = new ImageUploadDto
+            {
+                date = DateTime.Now.Date.ToString(),
+                description = "integrationTestDescription",
+                password = ConfigurationManager.GetPassword(),
+                tags = "integrationTestTag",
+                title = "integrationTestTitle"
+            };
+            var savedImage = await UploadNewImage(image.title, image.description, image.tags, image.date, image.annotation, image.inverted, image.password, imageBase64).ConfigureAwait(false);
+
+
+            var response = await _httpClient.GetAsync($"v2/Images/{savedImage.Image.Id}/Content").ConfigureAwait(false);
             var responseBytes = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
             var base64response = Convert.ToBase64String(responseBytes);
 
             Assert.AreEqual(imageBase64, base64response);
+            await DeleteImage(savedImage.Image.Id).ConfigureAwait(false);
         }
 
         [Test]
