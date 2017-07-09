@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -23,101 +25,247 @@ namespace WebApi.Tests
     {
         private HttpClient _httpClient = new HttpClient {BaseAddress = new Uri("http://localhost:5004")};
         
+        private List<string> ImagesToDelete { get; set; }
+        private List<Tuple<string, string>> RevisionToDelete { get; set; }
+
+        private ImageUploadDto _newImage = new ImageUploadDto
+        {
+            date = DateTime.Now.Date.ToString(),
+            description = "integrationTestDescription",
+            password = ConfigurationManager.GetPassword(),
+            tags = "integrationTestTag",
+            title = "integrationTestTitle"
+        };
+
+        private const string _newImageBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAIAAAACDbGyAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAhSURBVBhXY1Ta6MMABYwM//8zQdkg8B8ogswHAfx8BgYAD/YEKKaxNAIAAAAASUVORK5CYII=";
+        private const string _newRevisionImageBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAIAAAACDbGyAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAhSURBVBhXY1Ta6MMABYwM//8zQdkg8B8ogswHAfx8BgYAD/YEKKaxNAIAAAAASUVORK5CYII=";
+
+        [SetUp]
+        public void Setup()
+        {
+            ImagesToDelete = new List<string>();
+            RevisionToDelete = new List<Tuple<string, string>>();
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        }
 
         [Test]
-        public async Task GetImage()
+        public async Task GettingImageReturnsCreatedImage()
         {
-            var imageBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAIAAAACDbGyAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAhSURBVBhXY1Ta6MMABYwM//8zQdkg8B8ogswHAfx8BgYAD/YEKKaxNAIAAAAASUVORK5CYII=";
+            var savedImage = await CreateNewImage().ConfigureAwait(false);
 
-            var image = new ImageUploadDto
-            {
-                date = DateTime.Now.Date.ToString(),
-                description = "integrationTestDescription",
-                password = ConfigurationManager.GetPassword(),
-                tags = "integrationTestTag",
-                title = "integrationTestTitle"
-            };
-            var savedImage = await UploadNewImage(image.title, image.description, image.tags, image.date, image.annotation, image.inverted, image.password, imageBase64).ConfigureAwait(false);
-            
-            var response = await _httpClient.GetAsync($"v2/Images/{savedImage.Image.Id}").ConfigureAwait(false);
-            var responseJson = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var responseImage = JsonConvert.DeserializeObject<ImageResponse>(responseJson);
+            var responseImage = await GetImage(savedImage.Image.Id).ConfigureAwait(false);
 
-            Assert.AreEqual(responseImage.Image.Title, image.title);
-            
-            await DeleteImage(responseImage.Image.Id).ConfigureAwait(false);
+            Assert.AreEqual(responseImage.Image.Title, _newImage.title);
         }
 
         [Test]
         public async Task GetImageTag()
         {
-            var tag = "image";
+            var tag = Guid.NewGuid().ToString();
+            var revisionDescription = "revisionDescription";
 
-            var imageJson = @"[{""image"":{""id"":""594184f5296ae125f09b026c"",""type"":0,""filename"":""testImage.png"",""contentId"":""594184f5296ae125f09b0268"",""description"":""Image test description"",""title"":""Image test"",""thumb"":{""type"":1,""filename"":""thumb_testImage.png"",""contentId"":""594184f5296ae125f09b026a""},""annotation"":""594184c9296ae125f09b0262"",""inverted"":""594184dc296ae125f09b0267"",""tags"":[""image""],""date"":""2017-06-14"",""revisions"":[{""revisionDate"":""2017-06-14T18:48:39.238Z"",""revisionId"":""3c24d5b7-3ff1-4e4c-864b-d297012034d6"",""filename"":""testImageRevision.png"",""contentId"":""59418507296ae125f09b026f"",""thumb"":{""type"":1,""filename"":""thumb_testImageRevision.png"",""contentId"":""59418507296ae125f09b026d""},""description"":""Revision test""}]},""links"":{""imageContent"":""http://localhost:5004?tag=image/Images/594184f5296ae125f09b026c.png"",""thumbnailContent"":""http://localhost:5004/v2/Images/594184f5296ae125f09b026c/Thumbnail"",""annotationContent"":""http://localhost:5004?tag=image/Images/594184c9296ae125f09b0262.png"",""invertedContent"":""http://localhost:5004?tag=image/Images/594184dc296ae125f09b0267.png"",""revisions"":[{""thumb"":""http://localhost:5004/v2/Images/Content/59418507296ae125f09b026d"",""image"":""http://localhost:5004?tag=image/Images/59418507296ae125f09b026f.png"",""date"":""2017-06-14 18:48:39"",""description"":""Revision test"",""id"":""3c24d5b7-3ff1-4e4c-864b-d297012034d6""}]},""forumPost"":""[url=http://localhost:5004/v2/Images/594184f5296ae125f09b026c/Content][img]http://localhost:5004/v2/Images/594184f5296ae125f09b026c/Thumbnail[/img][/url]""}]";
-            
+            var savedImage = await CreateNewImage(tag).ConfigureAwait(false);
+            await CreateRevision(savedImage.Image.Id, revisionDescription).ConfigureAwait(false);
+
+            var updateImageDto = new ImageUpdateDto
+            {
+                image = savedImage.Image,
+                password = ConfigurationManager.GetPassword()
+            };
+            updateImageDto.image.Annotation = ObjectId.GenerateNewId().ToString();
+            updateImageDto.image.Inverted = ObjectId.GenerateNewId().ToString();
+
+            await UpdateImage(updateImageDto).ConfigureAwait(false);
+
+
+            var image = await GetImage(savedImage.Image.Id).ConfigureAwait(false);
+
             var response = await _httpClient.GetAsync($"v2/Images?tag={tag}").ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Error in {nameof(GetImageTag)}. Status code: {response.StatusCode}");
+            }
+
             var responseJson = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-            Assert.AreEqual(imageJson, responseJson);
-        }
-
-        [Test]
-        public async Task GetImageContent()
-        {
-            var imageBase64 = "iVBORw0KGgoAAAANSUhEUgAAAZAAAAGQCAYAAACAvzbMAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAFtUlEQVR4nO3XsQ2DUBAFQUBU4nrcrCuEAoi8yYmvmQpedKs7P7/vtQEvsU8PWMPj6jmDxTE9AIB3EhAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIDmnBwD/uKYHrGGfHrAGHwgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICADJDa28CEJQqEfiAAAAAElFTkSuQmCC";
-
-            var image = new ImageUploadDto
-            {
-                date = DateTime.Now.Date.ToString(),
-                description = "integrationTestDescription",
-                password = ConfigurationManager.GetPassword(),
-                tags = "integrationTestTag",
-                title = "integrationTestTitle"
-            };
-            var savedImage = await UploadNewImage(image.title, image.description, image.tags, image.date, image.annotation, image.inverted, image.password, imageBase64).ConfigureAwait(false);
-
-            var response = await _httpClient.GetAsync($"v2/Images/{savedImage.Image.Id}/Thumbnail").ConfigureAwait(false);
-            var responseBytes = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
-            var base64response = Convert.ToBase64String(responseBytes);
-
-            Assert.AreEqual(imageBase64, base64response);
-            await DeleteImage(savedImage.Image.Id).ConfigureAwait(false);
+            var imageJson = new StringBuilder();
+            imageJson.Append(@"[{""image"":{""id"":""");
+            imageJson.Append(image.Image.Id);
+            imageJson.Append(@""",""type"":0,""filename"":""");
+            imageJson.Append(image.Image.Filename);
+            imageJson.Append(@""",""contentId"":""");
+            imageJson.Append(image.Image.ContentId);
+            imageJson.Append(@""",""description"":""");
+            imageJson.Append(image.Image.Description);
+            imageJson.Append(@""",""title"":""");
+            imageJson.Append(image.Image.Title);
+            imageJson.Append(@""",""thumb"":{""type"":1,""filename"":""");
+            imageJson.Append(image.Image.Thumb.Filename);
+            imageJson.Append(@""",""contentId"":""");
+            imageJson.Append(image.Image.Thumb.ContentId);
+            imageJson.Append(@"""},""annotation"":""");
+            imageJson.Append(image.Image.Annotation);
+            imageJson.Append(@""",""inverted"":""");
+            imageJson.Append(image.Image.Inverted);
+            imageJson.Append(@""",""tags"":[""");
+            imageJson.Append(String.Join(",", image.Image.Tags));
+            imageJson.Append(@"""],""date"":""");
+            imageJson.Append(image.Image.Date);
+            imageJson.Append(@""",""revisions"":[{""revisionDate"":""");
+            imageJson.Append(image.Image.Revisions.Single().RevisionDate);
+            imageJson.Append(@""",""revisionId"":""");
+            imageJson.Append(image.Image.Revisions.Single().RevisionId);
+            imageJson.Append(@""",""filename"":""");
+            imageJson.Append(image.Image.Revisions.Single().Filename);
+            imageJson.Append(@""",""contentId"":""");
+            imageJson.Append(image.Image.Revisions.Single().ContentId);
+            imageJson.Append(@""",""thumb"":{""type"":1,""filename"":""");
+            imageJson.Append(image.Image.Revisions.Single().Thumb.Filename);
+            imageJson.Append(@""",""contentId"":""");
+            imageJson.Append(image.Image.Revisions.Single().Thumb.ContentId);
+            imageJson.Append(@"""},""description"":""");
+            imageJson.Append(image.Image.Revisions.Single().Description);
+            imageJson.Append(@"""}]},""links"":{""imageContent"":""http://localhost:5004?tag=");
+            imageJson.Append(String.Join(",", image.Image.Tags));
+            imageJson.Append(@"/Images/");
+            imageJson.Append(image.Image.Id);
+            imageJson.Append(@".png"",""thumbnailContent"":""http://localhost:5004/v2/Images/");
+            imageJson.Append(image.Image.Id);
+            imageJson.Append(@"/Thumbnail"",""annotationContent"":""http://localhost:5004/v2/Images/");
+            imageJson.Append(image.Image.Id);
+            imageJson.Append(@"/Annotation"",""invertedContent"":""http://localhost:5004/v2/Images/");
+            imageJson.Append(image.Image.Id);
+            imageJson.Append(@"/Inverted"",""revisions"":[{""thumb"":""http://localhost:5004/v2/Images/Content/");
+            imageJson.Append(image.Image.Revisions.Single().Thumb.ContentId);
+            imageJson.Append(@""",""image"":""http://localhost:5004?tag=");
+            imageJson.Append(String.Join(",", image.Image.Tags));
+            imageJson.Append(@"/Images/");
+            imageJson.Append(image.Image.Revisions.Single().ContentId);
+            imageJson.Append(@".png"",""date"":""");
+            imageJson.Append(image.Image.Revisions.Single().RevisionDate);
+            imageJson.Append(@""",""description"":""");
+            imageJson.Append(image.Image.Revisions.Single().Description);
+            imageJson.Append(@""",""id"":""");
+            imageJson.Append(image.Image.Revisions.Single().RevisionId);
+            imageJson.Append(@"""}]}}]");
+            
+            Assert.AreEqual(imageJson.ToString(), responseJson);
         }
 
         [Test]
         public async Task GetImageThumbnail()
         {
-            var imageBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAIAAAACDbGyAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAhSURBVBhXY1Ta6MMABYwM//8zQdkg8B8ogswHAfx8BgYAD/YEKKaxNAIAAAAASUVORK5CYII=";
-            var image = new ImageUploadDto
+            var thumbnailBase64 = "iVBORw0KGgoAAAANSUhEUgAAAZAAAAGQCAYAAACAvzbMAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAFtUlEQVR4nO3XsQ2DUBAFQUBU4nrcrCuEAoi8yYmvmQpedKs7P7/vtQEvsU8PWMPj6jmDxTE9AIB3EhAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIDmnBwD/uKYHrGGfHrAGHwgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICADJDa28CEJQqEfiAAAAAElFTkSuQmCC";
+            var savedImage = await CreateNewImage().ConfigureAwait(false);
+
+            var response = await _httpClient.GetAsync($"v2/Images/{savedImage.Image.Id}/Thumbnail").ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
             {
-                date = DateTime.Now.Date.ToString(),
-                description = "integrationTestDescription",
-                password = ConfigurationManager.GetPassword(),
-                tags = "integrationTestTag",
-                title = "integrationTestTitle"
-            };
-            var savedImage = await UploadNewImage(image.title, image.description, image.tags, image.date, image.annotation, image.inverted, image.password, imageBase64).ConfigureAwait(false);
+                throw new Exception($"Error in {nameof(GetImageThumbnail)}. Status code: {response.StatusCode}");
+            }
 
-
-            var response = await _httpClient.GetAsync($"v2/Images/{savedImage.Image.Id}/Content").ConfigureAwait(false);
             var responseBytes = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
             var base64response = Convert.ToBase64String(responseBytes);
 
-            Assert.AreEqual(imageBase64, base64response);
-            await DeleteImage(savedImage.Image.Id).ConfigureAwait(false);
+            Assert.AreEqual(thumbnailBase64, base64response);
+        }
+
+        [Test]
+        public async Task GetImageContent()
+        {
+            var savedImage = await CreateNewImage().ConfigureAwait(false);
+
+            var response = await _httpClient.GetAsync($"v2/Images/{savedImage.Image.Id}/Content").ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Error in {nameof(GetImageContent)}. Status code: {response.StatusCode}");
+            }
+
+            var responseBytes = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+            var base64response = Convert.ToBase64String(responseBytes);
+
+            Assert.AreEqual(_newImageBase64, base64response);
+        }
+
+        [Test]
+        public async Task GettingUpdatedImageReturnsUpdatedValues()
+        {
+            var savedImage = await CreateNewImage().ConfigureAwait(false);
+
+            var update = new ImageUpdateDto
+            {
+                image = new ImageViewModel
+                {
+                    Date = DateTime.Now.ToString(),
+                    Description = "newDescription",
+                    Annotation = ObjectId.GenerateNewId().ToString(),
+                    Id = savedImage.Image.Id,
+                    ContentId = ObjectId.GenerateNewId().ToString(),
+                    Filename = "newFilename",
+                    Inverted = ObjectId.GenerateNewId().ToString(),
+                    Revisions = new List<Revision> { new Revision
+                    {
+                        ContentId = ObjectId.GenerateNewId().ToString(),
+                        Description = "revision description",
+                        Filename = "revisionfilename",
+                        RevisionDate = DateTime.Now.ToString(),
+                        RevisionId = ObjectId.GenerateNewId().ToString(),
+                        Thumb = new Thumbnail
+                        {
+                            ContentId = ObjectId.GenerateNewId().ToString(),
+                            Filename = "revisionThumbFilename"
+                        }
+                    } },
+                    Tags = new []{"newTag1"},
+                    Thumb = new Thumbnail { ContentId = ObjectId.GenerateNewId().ToString(), Filename = "updateThumbFilename"},
+                    Title = "updatedTitle"
+                },
+                password = ConfigurationManager.GetPassword()
+            };
+
+            await UpdateImage(update).ConfigureAwait(false);
+
+            var updatedImage = await GetImage(savedImage.Image.Id).ConfigureAwait(false);
+
+            Assert.That(updatedImage.Image.Date, Is.EqualTo(update.image.Date));
+            Assert.That(updatedImage.Image.Description, Is.EqualTo(update.image.Description));
+            Assert.That(updatedImage.Image.Annotation, Is.EqualTo(update.image.Annotation));
+            Assert.That(updatedImage.Image.ContentId, Is.EqualTo(update.image.ContentId));
+            Assert.That(updatedImage.Image.Filename, Is.EqualTo(update.image.Filename));
+            Assert.That(updatedImage.Image.Inverted, Is.EqualTo(update.image.Inverted));
+            Assert.That(updatedImage.Image.Revisions.Single().Description, Is.EqualTo(update.image.Revisions.Single().Description));
+            Assert.That(updatedImage.Image.Revisions.Single().ContentId, Is.EqualTo(update.image.Revisions.Single().ContentId));
+            Assert.That(updatedImage.Image.Revisions.Single().Filename, Is.EqualTo(update.image.Revisions.Single().Filename));
+            Assert.That(updatedImage.Image.Revisions.Single().RevisionDate, Is.EqualTo(update.image.Revisions.Single().RevisionDate));
+            Assert.That(updatedImage.Image.Revisions.Single().RevisionId, Is.EqualTo(update.image.Revisions.Single().RevisionId));
+            Assert.That(updatedImage.Image.Revisions.Single().Thumb.ContentId, Is.EqualTo(update.image.Revisions.Single().Thumb.ContentId));
+            Assert.That(updatedImage.Image.Revisions.Single().Thumb.Filename, Is.EqualTo(update.image.Revisions.Single().Thumb.Filename));
+            Assert.That(updatedImage.Image.Tags.Single(), Is.EqualTo(update.image.Tags.Single()));
+            Assert.That(updatedImage.Image.Thumb.ContentId, Is.EqualTo(update.image.Thumb.ContentId));
+            Assert.That(updatedImage.Image.Thumb.Filename, Is.EqualTo(update.image.Thumb.Filename));
+            Assert.That(updatedImage.Image.Title, Is.EqualTo(update.image.Title));
         }
 
         [Test]
         public async Task GetContentById()
         {
-            var imageId = "59418507296ae125f09b026d";
-            var imageBase64 = "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m8dtn+bdC137vH57qW375v12TftB3pxvz+k+bP868FkCbEMFAkCk+BdKaaID1Mk03sFND/D5AAQsJBxiISFAK7cyASBS9zoQN1MEKKZ4D8Tt3AHqVPxWJtsf2hdKASxBEx2AyIgm+j4v7proAGUV74FsYq11IB3H1e8AjqBsD+T0pE10gAOouwdiGi9AMcXvhbX9oSf+e7Zaid48/lWgAfvmbrwARC6nps7fdM3CAihLE33kSVhICPBW3U10AIqp+2aKY/k+EIDF1b2QsLZpvE3X04r/D4DDcjNFACK+UAqAiFlYa/B9IMABmIUFQKTuJnpp7sYLHJhbmQAQKd4D2b2tbqYIUBkB8oVbmQBMVneA1LaQEOCJWAcCQGTENF4XYwDeO19fTtfSJwFAfUzjBSAiQACICBAAIgIEgIgAASAiQACICBAAIgIEgIgAASAiQACICBAAIgIEgMiHr/dFL/UAoFoqEAAiZQNEBQNQLRUIAJG6A0SlAlBM3QECQDECBIDIMQLEEBfA4o4RIAAsToAAEBEgAEQECAARAQJARIAAEBEgAEQECAARAfKFRYYAkwkQACKX0iewC6+lTwCgPioQACICBICIAAEgIkAAiAgQACICBICIAAEgIkAAiAgQACICBIDIMW5l4lYlAItTgQAQESAARAQIAJG6eyB6GwDFqEAAiAgQACJlh7AMQQFUSwUCQESAABA5X19O19InAUB9VCAARAQIABEBAkBEgAAQESAARAQIABEBAkBEgAAQESAARAQIABEBAkBEgAAQESAARAQIABEBAkBEgAAQESAARAQIABEBAkBEgAAQESAARAQIABEBAkBEgAAQESAARAQIABEBAkBEgAAQESAARAQIABEBAkBEgAAQESAARAQIABEBAkBEgAAQESAARAQIABEBAkBEgAAQESAARAQIABEBAkBEgAAQESAARAQIABEBAkBEgAAQESAARAQIABEBAkBEgAAQESAARAQIABEBAkBEgAAQESAARAQIABEBAkBEgAAQESAARAQIABEBAkBEgAAQESAARAQIABEBAkBEgAAQESAARAQIABEBAkDk/6l5FqB6eYsyAAAAAElFTkSuQmCC";
+            var savedImage = await CreateNewImage().ConfigureAwait(false);
+            var revision = await CreateRevision(savedImage.Image.Id).ConfigureAwait(false);
             
-            var response = await _httpClient.GetAsync($"v2/Images/Content/{imageId}").ConfigureAwait(false);
+            var response = await _httpClient.GetAsync($"v2/Images/Content/{revision.ContentId}").ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Error in {nameof(GetContentById)}. Status code: {response.StatusCode}");
+            }
+
             var responseBytes = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
             var base64response = Convert.ToBase64String(responseBytes);
 
-            Assert.AreEqual(imageBase64, base64response);
+            Assert.AreEqual(_newImageBase64, base64response);
         }
 
         [Test]
@@ -125,11 +273,7 @@ namespace WebApi.Tests
         {
             var password = ConfigurationManager.GetPassword();
             var imageId = ObjectId.GenerateNewId();
-            _httpClient.DefaultRequestHeaders
-                .Accept
-                .Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var postResponse = await _httpClient.PostAsync($"v2/Images/Featured/{imageId}/{password}", new StringContent("")).ConfigureAwait(false);
-
 
             var getResponse = await _httpClient.GetAsync($"v2/Images/Featured").ConfigureAwait(false);
             var json = await getResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -139,25 +283,125 @@ namespace WebApi.Tests
             Assert.That(featuredImage.ImageId, Is.EqualTo(imageId.ToString()));
         }
 
-        private async Task<ImageResponse> UploadNewImage(string title, string description,string tags, string date, string annotation, string inverted, string password, string file)
+        [Test]
+        public async Task RevisionIsRemovedFromImageAfterDeleting()
+        {
+            var revisionDescription = "test revision description";
+            var image = await CreateNewImage().ConfigureAwait(false);
+            var revision = await CreateRevision(image.Image.Id, revisionDescription).ConfigureAwait(false);
+            var imageWithRevision = await GetImage(image.Image.Id).ConfigureAwait(false);
+            Assert.That(imageWithRevision.Image.Revisions.Count, Is.EqualTo(1));
+            Assert.That(imageWithRevision.Image.Revisions.Single().Description, Is.EqualTo(revisionDescription));
+        }
+
+        //HELPERS
+        
+        //IMAGE
+
+        private async Task<ImageResponse> CreateNewImage(string tags="image", string imageBase64= _newImageBase64)
         {
             var content = new MultipartFormDataContent();
-            content.Add(new ByteArrayContent(Convert.FromBase64String(file)), "file", "file.jpg");
-            content.Add(new StringContent(title), "title");
-            content.Add(new StringContent(description ?? string.Empty), "description");
+            content.Add(new ByteArrayContent(Convert.FromBase64String(imageBase64)), "file", "file.png");
+            content.Add(new StringContent(_newImage.title), "title");
+            content.Add(new StringContent(_newImage.description ?? string.Empty), "description");
             content.Add(new StringContent(tags), "tags");
-            content.Add(new StringContent(date ?? string.Empty), "date");
-            content.Add(new StringContent(annotation ?? string.Empty), "annotation");
-            content.Add(new StringContent(inverted ?? string.Empty), "inverted");
-            content.Add(new StringContent(password), "password");
+            content.Add(new StringContent(_newImage.date ?? string.Empty), "date");
+            content.Add(new StringContent(_newImage.annotation ?? string.Empty), "annotation");
+            content.Add(new StringContent(_newImage.inverted ?? string.Empty), "inverted");
+            content.Add(new StringContent(ConfigurationManager.GetPassword()), "password");
             var response = await _httpClient.PostAsync("v2/Images", content).ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Error in {nameof(CreateNewImage)}. Status code: {response.StatusCode}");
+            }
+
             var stringResponse = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var savedImage = JsonConvert.DeserializeObject<ImageResponse>(stringResponse);
+            ImagesToDelete.Add(savedImage.Image.Id);
+            return savedImage;
+        }
+
+        private async Task<ImageResponse> GetImage(string imageId)
+        {
+            var response = await _httpClient.GetAsync($"v2/Images/{imageId}").ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Error in {nameof(GetImage)}. Status code: {response.StatusCode}");
+            }
+
+            var responseJson = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var responseImage = JsonConvert.DeserializeObject<ImageResponse>(responseJson);
+            return responseImage;
+        }
+
+        private async Task<ImageResponse> UpdateImage(ImageUpdateDto image)
+        {
+            var content = new StringContent(JsonConvert.SerializeObject(image), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PutAsync("v2/Images", content).ConfigureAwait(false);
+            var stringResponse = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Error in {nameof(UpdateImage)}. Status code: {response.StatusCode}. Error: {stringResponse}");
+            }
+            
             return JsonConvert.DeserializeObject<ImageResponse>(stringResponse);
         }
 
         private async Task DeleteImage(string id)
         {
-            await _httpClient.DeleteAsync($"v2/Images/{id}/{ConfigurationManager.GetPassword()}").ConfigureAwait(false);
+            var response = await _httpClient.DeleteAsync($"v2/Images/{id}/{ConfigurationManager.GetPassword()}").ConfigureAwait(false);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Error in {nameof(DeleteImage)}. Status code: {response.StatusCode}");
+            }
+        }
+
+        //REVISIONS
+
+        private async Task<Revision> CreateRevision(string id, string description = "", string base64image = _newRevisionImageBase64)
+        {
+            var content = new MultipartFormDataContent();
+            content.Add(new ByteArrayContent(Convert.FromBase64String(base64image)), "file", "file.png");
+            content.Add(new StringContent(description), "description");
+            content.Add(new StringContent(id), "imageId");
+            content.Add(new StringContent(ConfigurationManager.GetPassword()), "password");
+            var response = await _httpClient.PostAsync("v2/Images/Revision", content).ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Error in {nameof(CreateRevision)}. Status code: {response.StatusCode}");
+            }
+
+            var stringResponse = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var image = JsonConvert.DeserializeObject<Image>(stringResponse);
+            var revision = image.Revisions.OrderByDescending(x => x.RevisionDate).First();
+            RevisionToDelete.Add(new Tuple<string,string>(id,revision.RevisionId));
+            return revision;
+        }
+
+        private async Task DeleteRevision(Tuple<string, string> revision)
+        {
+            var response = await _httpClient.DeleteAsync($"v2/Images/{revision.Item1}/revision/{revision.Item2}/{ConfigurationManager.GetPassword()}").ConfigureAwait(false);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Error in {nameof(DeleteRevision)}. Status code: {response.StatusCode}");
+            }
+        }
+
+        [TearDown]
+        public async Task Teardown()
+        {
+            foreach (var id in RevisionToDelete)
+            {
+                await DeleteRevision(id).ConfigureAwait(false);
+            }
+
+            foreach (var id in ImagesToDelete)
+            {
+                await DeleteImage(id).ConfigureAwait(false);
+            }
         }
     }
 }

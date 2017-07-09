@@ -98,7 +98,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
                     var revision = new Revision
                     {
                         Description = model.description,
-                        RevisionDate = DateTime.Now,
+                        RevisionDate = DateTime.Now.ToString(),
                         Thumb = new Thumbnail
                         {
                             Filename = $"thumb_{fileName}"
@@ -134,15 +134,22 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [HttpPut]
         public dynamic UpdateImage([FromBody] ImageUpdateDto imageVm)
         {
-            Security.ValidatePassword(imageVm?.password);
-            if (imageVm?.image != null)
+            try
             {
-                var image = imageVm.image.ToImage();
-                var originalImage = DataAccess.Get(image.Id.ToString());
-                image.Revisions = originalImage.Revisions;
-                return DataAccess.Update(image);
+                Security.ValidatePassword(imageVm?.password);
+                if (imageVm?.image != null)
+                {
+                    var image = imageVm.image.ToImage();
+                    var originalImage = DataAccess.Get(image.Id.ToString());
+                    image.Revisions = originalImage.Revisions;
+                    return DataAccess.Update(image);
+                }
+                return null;
             }
-            return null;
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
         }
 
         [HttpDelete]
@@ -227,7 +234,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
                         id = revision.RevisionId,
                         Thumb = revisionThumbPath,
                         Image = revisionImagePath,
-                        date = revision.RevisionDate.ToString("yyyy-MM-dd HH:mm:ss"),
+                        date = revision.RevisionDate,
                         description = revision.Description
                     });
                 }
@@ -243,9 +250,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
                     AnnotationContent = annotationPath,
                     InvertedContent = invertedPath,
                     Revisions = revisions
-                },
-                ForumPost =
-                $"[url={Url.Link("ImageContentRoute", new {image.Id})}][img]{Url.Link("ThumbContentRoute", new {image.Id})}[/img][/url]"
+                }
             };
             return result;
         }
@@ -315,8 +320,6 @@ namespace artmdv_webapi.Areas.v2.Controllers
             resizedStream.Position = 0;
             return resizedStream;
         }
-
-        
 
         [Route("Featured")]
         [HttpGet]

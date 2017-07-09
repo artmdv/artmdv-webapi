@@ -153,21 +153,23 @@ namespace artmdv_webapi.Areas.v2.Repository
         {
             if (string.IsNullOrWhiteSpace(tag))
             {
-                return await Collection.Find(x=>x.Tags != null).ToListAsync();
+                return await Collection.Find(x=>x.Tags != null).ToListAsync().ConfigureAwait(false);
             }
-            return await Collection.Find(x=>x.Tags.Any(y=>tag.Split(',').Contains(y))).ToListAsync();
+            return await Collection.Find(x=>x.Tags.Any(y=>tag.Split(',').Contains(y))).ToListAsync().ConfigureAwait(false);
         }
 
         public void Delete(string id)
         {
             var image = Get(id);
+            if (image != null)
+            {
+                GridFs.Delete(ObjectId.Parse(image.ContentId));
+                GridFs.Delete(ObjectId.Parse(image.Thumb.ContentId));
 
-            GridFs.Delete(ObjectId.Parse(image.ContentId));
-            GridFs.Delete(ObjectId.Parse(image.Thumb.ContentId));
-
-            var builder = Builders<Image>.Filter;
-            var filter = builder.Eq("_id", ObjectId.Parse(id));
-            Collection.DeleteOne(filter);
+                var builder = Builders<Image>.Filter;
+                var filter = builder.Eq("_id", ObjectId.Parse(id));
+                Collection.DeleteOne(filter);
+            }
         }
 
         public Stream GetAnnotationContent(string id)

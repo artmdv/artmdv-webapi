@@ -7,7 +7,7 @@ namespace artmdv_webapi.Areas.v2.Models
 {
     public class Revision
     {
-        public DateTime RevisionDate { get; set; }
+        public string RevisionDate { get; set; }
         public string RevisionId { get; set; }
         public string Filename { get; set; }
         public string ContentId { get; set; }
