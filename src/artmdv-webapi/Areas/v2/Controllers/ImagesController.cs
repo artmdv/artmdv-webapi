@@ -2,20 +2,17 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using artmdv_webapi.Areas.v2.Command;
+using artmdv_webapi.Areas.v2.Core;
 using artmdv_webapi.Areas.v2.Models;
 using artmdv_webapi.Areas.v2.Query;
 using artmdv_webapi.Areas.v2.Repository;
 using ImageProcessorCore;
 using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Image = artmdv_webapi.Areas.v2.Models.Image;
 
 namespace artmdv_webapi.Areas.v2.Controllers
@@ -41,7 +38,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
         {
             try
             {
-                CheckPassword(model?.password);
+                Security.ValidatePassword(model?.password);
 
                 if (model?.file?.Length > 0)
                 {
@@ -88,7 +85,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
         {
             try
             {
-                CheckPassword(model?.password);
+                Security.ValidatePassword(model?.password);
                 if (model?.file?.Length > 0 && !string.IsNullOrWhiteSpace(model.imageId))
                 {
                     var fileName = ContentDispositionHeaderValue
@@ -137,7 +134,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [HttpPut]
         public dynamic UpdateImage([FromBody] ImageUpdateDto imageVm)
         {
-            CheckPassword(imageVm?.password);
+            Security.ValidatePassword(imageVm?.password);
             if (imageVm?.image != null)
             {
                 var image = imageVm.image.ToImage();
@@ -152,7 +149,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [Route("{id}/{password}")]
         public dynamic DeleteImage(string password, string id)
         {
-            CheckPassword(password);
+            Security.ValidatePassword(password);
             DataAccess.Delete(id);
             return null;
         }
@@ -163,7 +160,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
         {
             try
             {
-                CheckPassword(password);
+                Security.ValidatePassword(password);
                 var image = DataAccess.Get(id);
                 image.Revisions.Remove(image.Revisions.Single(x => x.RevisionId == revisionId));
                 DataAccess.Update(image);
@@ -319,21 +316,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
             return resizedStream;
         }
 
-        private static void CheckPassword(string password)
-        {
-            var fs = new FileStream("config.json", FileMode.Open, FileAccess.Read);
-            JObject config = null;
-            using (StreamReader streamReader = new StreamReader(fs))
-            using (JsonTextReader reader = new JsonTextReader(streamReader))
-            {
-                config = (JObject) JToken.ReadFrom(reader);
-            }
-            if (config?.GetValue("password").ToString() != password)
-            {
-                throw new HttpRequestException();
-            }
-
-        }
+        
 
         [Route("Featured")]
         [HttpGet]
@@ -347,45 +330,10 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [HttpPost]
         public ActionResult SetFeaturedImage(string id, string password)
         {
-            CheckPassword(password);
+            Security.ValidatePassword(password);
             var command = new SetFeaturedImageCommand(id);
             SetFeaturedImageCommandHandler.Handle(command);
             return new OkResult();
         }
-    }
-
-    public class RevisionPaths
-    {
-        public string Thumb { get; set; }
-        public string Image { get; set; }
-        public string date { get; set; }
-        public string description { get; set; }
-        public string id { get; set; }
-    }
-
-    public class ImageUpdateDto
-    {
-        public ImageViewModel image { get; set; }
-        public string password { get; set; }
-    }
-
-    public class ImageRevisionDto
-    {
-        public string imageId { get; set; }
-        public IFormFile file { get; set; }
-        public string description { get; set; }
-        public string password { get; set; }
-    }
-
-    public class ImageUploadDto
-    {
-        public IFormFile file { get; set; }
-        public string title { get; set; }
-        public string description { get; set; }
-        public string tags { get; set; }
-        public string date { get; set; }
-        public string annotation { get; set; }
-        public string inverted { get; set; }
-        public string password { get; set; }
     }
 }

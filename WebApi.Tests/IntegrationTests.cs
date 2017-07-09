@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using artmdv_webapi.Areas.v2.Controllers;
+using artmdv_webapi.Areas.v2.Core;
 using artmdv_webapi.Areas.v2.Models;
 using Microsoft.AspNetCore.Http.Internal;
 using MongoDB.Bson;
@@ -17,7 +18,7 @@ using JsonConvert = Newtonsoft.Json.JsonConvert;
 
 namespace WebApi.Tests
 {
-    [TestFixture]
+    [TestFixture, Explicit]
     public class IntegrationTests
     {
         private HttpClient _httpClient = new HttpClient {BaseAddress = new Uri("http://localhost:5004")};
@@ -32,7 +33,7 @@ namespace WebApi.Tests
             {
                 date = DateTime.Now.Date.ToString(),
                 description = "integrationTestDescription",
-                password = GetPasswordFromConfig(),
+                password = ConfigurationManager.GetPassword(),
                 tags = "integrationTestTag",
                 title = "integrationTestTitle"
             };
@@ -102,7 +103,7 @@ namespace WebApi.Tests
         [Test]
         public async Task GetFeaturedImageReturnsTheOneThatWasSet()
         {
-            var password = GetPasswordFromConfig();
+            var password = ConfigurationManager.GetPassword();
             var imageId = ObjectId.GenerateNewId();
             _httpClient.DefaultRequestHeaders
                 .Accept
@@ -136,19 +137,7 @@ namespace WebApi.Tests
 
         private async Task DeleteImage(string id)
         {
-            await _httpClient.DeleteAsync($"v2/Images/{id}/{GetPasswordFromConfig()}").ConfigureAwait(false);
-        }
-
-        private string GetPasswordFromConfig()
-        {
-            var fs = new FileStream("config.json", FileMode.Open, FileAccess.Read);
-            JObject config = null;
-            using (StreamReader streamReader = new StreamReader(fs))
-            using (JsonTextReader reader = new JsonTextReader(streamReader))
-            {
-                config = (JObject)JToken.ReadFrom(reader);
-            }
-            return config?.GetValue("password").ToString();
+            await _httpClient.DeleteAsync($"v2/Images/{id}/{ConfigurationManager.GetPassword()}").ConfigureAwait(false);
         }
     }
 }
