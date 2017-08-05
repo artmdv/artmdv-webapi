@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using artmdv_webapi.Areas.v2.Infrastructure;
 using artmdv_webapi.Areas.v2.Models;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -14,14 +15,16 @@ namespace artmdv_webapi.Areas.v2.Repository
 {
     public class ImageRepository : IImageRepository
     {
+        public IFile File { get; }
         private GridFSBucket GridFs { get; set; }
         public IMongoDatabase Database { get; set; }
         private IMongoCollection<Image> Collection { get; set; }
 
         private string ImageDirectory { get; set; }
 
-        public ImageRepository()
+        public ImageRepository(IFile file)
         {
+            File = file;
             var client = new MongoClient("mongodb://localhost:27017");
             Database = client.GetDatabase("v2");
             Collection = Database.GetCollection<Image>("Images");

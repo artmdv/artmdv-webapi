@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using artmdv_webapi.Areas.v2.Infrastructure;
 using artmdv_webapi.Areas.v2.Repository;
+using Moq;
 using NUnit.Framework;
 
 namespace WebApi.Tests
@@ -13,7 +15,9 @@ namespace WebApi.Tests
         public void IfImageDoesNotExistGenerateFilenameReturnsFilename()
         {
             var testFilename = "testFilename.jpg";
-            var repo = new ImageRepository();
+            var filemock = new Mock<IFile>();
+            filemock.Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
+            var repo = new ImageRepository(filemock.Object);
             var returnedFilename = repo.GenerateFileName(testFilename);
             Assert.That(returnedFilename, Is.EqualTo(testFilename));
         }
@@ -23,7 +27,10 @@ namespace WebApi.Tests
         {
             var testFilename = "testFilename.jpg";
             var testFilenameWith1 = "testFilename(1).jpg";
-            var repo = new ImageRepository();
+            var filemock = new Mock<IFile>();
+            filemock.Setup(x => x.Exists(It.Is<string>(s=>s == testFilename))).Returns(true);
+            filemock.Setup(x => x.Exists(It.Is<string>(s=>s != testFilename))).Returns(false);
+            var repo = new ImageRepository(filemock.Object);
             var returnedFilename = repo.GenerateFileName(testFilename);
             Assert.That(returnedFilename, Is.EqualTo(testFilenameWith1));
         }
@@ -32,8 +39,12 @@ namespace WebApi.Tests
         public void IfImageExistsWithNumber1GenerateFilenameReturnsFilenameWithNumber2()
         {
             var testFilename = "testFilename.jpg";
+            var testFilenameWith1 = "testFilename(1).jpg";
             var testFilenameWith2 = "testFilename(2).jpg";
-            var repo = new ImageRepository();
+            var filemock = new Mock<IFile>();
+            filemock.Setup(x => x.Exists(It.Is<string>(s => s == testFilename || s == testFilenameWith1))).Returns(true);
+            filemock.Setup(x => x.Exists(It.Is<string>(s => s != testFilename))).Returns(false);
+            var repo = new ImageRepository(filemock.Object);
             var returnedFilename = repo.GenerateFileName(testFilename);
             Assert.That(returnedFilename, Is.EqualTo(testFilenameWith2));
         }
