@@ -44,34 +44,41 @@ namespace artmdv_webapi.Areas.v2.Repository
         public string Create(Image image, Stream imagecontent, Stream thumbContent)
         {
             imagecontent.Position = 0;
-            var imageId = GridFs.UploadFromStream(image.Filename, imagecontent);
-            image.ContentId = imageId.ToString();
+
+            image.Filename = CreateImageFile(imagecontent, image.Filename);
 
             var thumbId = CreateThumb(image.Thumb.Filename, thumbContent);
             image.Thumb.ContentId = thumbId.ToString();
             image.Id = ObjectId.GenerateNewId(DateTime.Now);
+            
             Collection.InsertOne(image);
             
-            using (var fileStream = File.Create($"{ImageDirectory}/{image.Id}{Path.GetExtension(image.Filename)}"))
-            {
-                imagecontent.Position = 0;
-                imagecontent.CopyTo(fileStream);
-            }
             return image.Id.ToString();
         }
 
-        public string CreateImage(Stream imageContent, string fileName)
+        public string CreateImageFile(Stream imageContent, string fileName)
         {
-            imageContent.Position = 0;
-            var imageId = GridFs.UploadFromStream(fileName, imageContent);
-
-            using (var fileStream = File.Create($"{ImageDirectory}/{imageId}{Path.GetExtension(fileName)}"))
+            var generatedFileName = GenerateFileName(fileName);
+            using (var fileStream = File.Create($"{ImageDirectory}/{generatedFileName}"))
             {
                 imageContent.Position = 0;
                 imageContent.CopyTo(fileStream);
             }
 
-            return imageId.ToString();
+            return generatedFileName;
+        }
+
+        public string GenerateFileName(string fileName)
+        {
+            //TODO: write test
+            var newFileName = Path.GetFileNameWithoutExtension(fileName);
+            var generatedFileName = newFileName;
+            var i = 1;
+            while (File.Exists($"{ImageDirectory}/{generatedFileName}{Path.GetExtension(fileName)}"))
+            {
+                generatedFileName = $"{newFileName}({i++})";
+            }
+            return $"{generatedFileName}{Path.GetExtension(fileName)}";
         }
 
         public string CreateThumb(string filename, Stream thumbContent)
@@ -85,25 +92,20 @@ namespace artmdv_webapi.Areas.v2.Repository
             var builder = Builders<Image>.Filter;
             var filter = builder.Eq("_id", image.Id);
             Collection.ReplaceOne(filter, image);
-            if (!File.Exists($"{ImageDirectory}/{image.Id}.{Path.GetExtension(image.Filename)}"))
-            {
-                using (var fileStream = File.Create($"{ImageDirectory}/{image.Id}{Path.GetExtension(image.Filename)}"))
-                {
-                    var imagecontent = GetImageContent(image.Id.ToString());
-                    imagecontent.Position = 0;
-                    imagecontent.CopyTo(fileStream);
-                }
-            }
             return image;
         }
 
         public Image Get(string id)
         {
             if (string.IsNullOrEmpty(id))
+            {
                 return null;
+            }
             var objId = new ObjectId();
             if (!ObjectId.TryParse(id, out objId))
+            {
                 return null;
+            }
             var builder = Builders<Image>.Filter;
             var filter = builder.Eq("_id", ObjectId.Parse(id));
             return Collection.Find(filter).FirstOrDefault();
@@ -113,7 +115,9 @@ namespace artmdv_webapi.Areas.v2.Repository
         {
             var objId = new ObjectId();
             if (!ObjectId.TryParse(id, out objId))
+            {
                 return null;
+            }
             var image = Get(id);
 
             var content = new MemoryStream();
@@ -126,7 +130,9 @@ namespace artmdv_webapi.Areas.v2.Repository
         {
             var objId = new ObjectId();
             if (!ObjectId.TryParse(id, out objId))
+            {
                 return null;
+            }
             var content = new MemoryStream();
             GridFs.DownloadToStream(ObjectId.Parse(id), content);
             content.Position = 0;
@@ -136,12 +142,22 @@ namespace artmdv_webapi.Areas.v2.Repository
         public Stream GetImageContent(string id)
         {
             if (string.IsNullOrEmpty(id))
+            {
                 return null;
+            }
 
             var objId = new ObjectId();
             if (!ObjectId.TryParse(id, out objId))
+            {
                 return null;
+            }
+
             var image = Get(id);
+
+            if (string.IsNullOrEmpty(image.ContentId))
+            {
+                return null;
+            }
 
             var content = new MemoryStream();
             GridFs.DownloadToStream(ObjectId.Parse(image.ContentId), content);
@@ -153,21 +169,23 @@ namespace artmdv_webapi.Areas.v2.Repository
         {
             if (string.IsNullOrWhiteSpace(tag))
             {
-                return await Collection.Find(x=>x.Tags != null).ToListAsync();
+                return await Collection.Find(x=>x.Tags != null).ToListAsync().ConfigureAwait(false);
             }
-            return await Collection.Find(x=>x.Tags.Any(y=>tag.Split(',').Contains(y))).ToListAsync();
+            return await Collection.Find(x=>x.Tags.Any(y=>tag.Split(',').Contains(y))).ToListAsync().ConfigureAwait(false);
         }
 
         public void Delete(string id)
         {
             var image = Get(id);
+            if (image != null)
+            {
+                GridFs.Delete(ObjectId.Parse(image.ContentId));
+                GridFs.Delete(ObjectId.Parse(image.Thumb.ContentId));
 
-            GridFs.Delete(ObjectId.Parse(image.ContentId));
-            GridFs.Delete(ObjectId.Parse(image.Thumb.ContentId));
-
-            var builder = Builders<Image>.Filter;
-            var filter = builder.Eq("_id", ObjectId.Parse(id));
-            Collection.DeleteOne(filter);
+                var builder = Builders<Image>.Filter;
+                var filter = builder.Eq("_id", ObjectId.Parse(id));
+                Collection.DeleteOne(filter);
+            }
         }
 
         public Stream GetAnnotationContent(string id)
@@ -185,7 +203,13 @@ namespace artmdv_webapi.Areas.v2.Repository
         public string GetPath(Image image)
         {
             if (image == null)
+            {
                 return null;
+            }
+            if (File.Exists($"{ImageDirectory}/{image.Filename}"))
+            {
+                return $"{ImageDirectory}/{image.Filename}";
+            }
             if (File.Exists($"{ImageDirectory}/{image.Id}{Path.GetExtension(image.Filename)}"))
             {
                 return $"Images/{image.Id}{Path.GetExtension(image.Filename)}";
@@ -208,7 +232,13 @@ namespace artmdv_webapi.Areas.v2.Repository
         public string GetRevisionPath(Revision image)
         {
             if (image == null)
+            {
                 return null;
+            }
+            if (File.Exists($"{ImageDirectory}/{image.Filename}"))
+            {
+                return $"{ImageDirectory}/{image.Filename}";
+            }
             if (File.Exists($"{ImageDirectory}/{image.ContentId}{Path.GetExtension(image.Filename)}"))
             {
                 return $"Images/{image.ContentId}{Path.GetExtension(image.Filename)}";

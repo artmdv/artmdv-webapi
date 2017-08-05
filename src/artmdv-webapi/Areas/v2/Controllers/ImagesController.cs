@@ -2,20 +2,17 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using artmdv_webapi.Areas.v2.Command;
+using artmdv_webapi.Areas.v2.Core;
 using artmdv_webapi.Areas.v2.Models;
 using artmdv_webapi.Areas.v2.Query;
 using artmdv_webapi.Areas.v2.Repository;
 using ImageProcessorCore;
 using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Image = artmdv_webapi.Areas.v2.Models.Image;
 
 namespace artmdv_webapi.Areas.v2.Controllers
@@ -41,7 +38,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
         {
             try
             {
-                CheckPassword(model?.password);
+                Security.ValidatePassword(model?.password);
 
                 if (model?.file?.Length > 0)
                 {
@@ -88,7 +85,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
         {
             try
             {
-                CheckPassword(model?.password);
+                Security.ValidatePassword(model?.password);
                 if (model?.file?.Length > 0 && !string.IsNullOrWhiteSpace(model.imageId))
                 {
                     var fileName = ContentDispositionHeaderValue
@@ -113,7 +110,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
                     var thumb = GenerateThumbnail(thumbStream);
                     var thumbId = DataAccess.CreateThumb(revision.Thumb.Filename, thumb);
                     revision.Thumb.ContentId = thumbId;
-                    revision.ContentId = DataAccess.CreateImage(fileStream, fileName);
+                    revision.Filename = DataAccess.CreateImageFile(fileStream, fileName);
                     revision.RevisionId = Guid.NewGuid().ToString();
 
                     var image = DataAccess.Get(model.imageId);
@@ -137,22 +134,29 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [HttpPut]
         public dynamic UpdateImage([FromBody] ImageUpdateDto imageVm)
         {
-            CheckPassword(imageVm?.password);
-            if (imageVm?.image != null)
+            try
             {
-                var image = imageVm.image.ToImage();
-                var originalImage = DataAccess.Get(image.Id.ToString());
-                image.Revisions = originalImage.Revisions;
-                return DataAccess.Update(image);
+                Security.ValidatePassword(imageVm?.password);
+                if (imageVm?.image != null)
+                {
+                    var image = imageVm.image.ToImage();
+                    var originalImage = DataAccess.Get(image.Id.ToString());
+                    image.Revisions = originalImage.Revisions;
+                    return DataAccess.Update(image);
+                }
+                return null;
             }
-            return null;
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
         }
 
         [HttpDelete]
         [Route("{id}/{password}")]
         public dynamic DeleteImage(string password, string id)
         {
-            CheckPassword(password);
+            Security.ValidatePassword(password);
             DataAccess.Delete(id);
             return null;
         }
@@ -163,7 +167,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
         {
             try
             {
-                CheckPassword(password);
+                Security.ValidatePassword(password);
                 var image = DataAccess.Get(id);
                 image.Revisions.Remove(image.Revisions.Single(x => x.RevisionId == revisionId));
                 DataAccess.Update(image);
@@ -230,7 +234,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
                         id = revision.RevisionId,
                         Thumb = revisionThumbPath,
                         Image = revisionImagePath,
-                        date = revision.RevisionDate.ToString("yyyy-MM-dd HH:mm:ss"),
+                        date = revision.RevisionDate,
                         description = revision.Description
                     });
                 }
@@ -246,9 +250,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
                     AnnotationContent = annotationPath,
                     InvertedContent = invertedPath,
                     Revisions = revisions
-                },
-                ForumPost =
-                $"[url={Url.Link("ImageContentRoute", new {image.Id})}][img]{Url.Link("ThumbContentRoute", new {image.Id})}[/img][/url]"
+                }
             };
             return result;
         }
@@ -273,7 +275,11 @@ namespace artmdv_webapi.Areas.v2.Controllers
         public ActionResult GetImageContent(string id)
         {
             var image = DataAccess.GetImageContent(id);
-            return new FileStreamResult(image, "image/jpeg");
+            if (image != null)
+            {
+                return new FileStreamResult(image, "image/jpeg");
+            }
+            return null;
         }
 
         [HttpGet]
@@ -281,32 +287,44 @@ namespace artmdv_webapi.Areas.v2.Controllers
         public ActionResult GetContentById(string id)
         {
             var image = DataAccess.GetByContentId(id);
-            return new FileStreamResult(image, "image/jpeg");
+            if (image != null)
+            {
+                return new FileStreamResult(image, "image/jpeg");
+            }
+            return null;
         }
 
         [Route("{id}/Thumbnail", Name = "ThumbContentRoute")]
         public ActionResult GetThumb(string id)
         {
             var image = DataAccess.GetThumbContent(id);
-            return new FileStreamResult(image, "image/jpeg");
+            if (image != null)
+            {
+                return new FileStreamResult(image, "image/jpeg");
+            }
+            return null;
         }
 
         [Route("{id}/Annotation", Name = "AnnotationContentRoute")]
         public ActionResult GetAnnotation(string id)
         {
             var image = DataAccess.GetAnnotationContent(id);
-            if (image == null)
-                return null;
-            return new FileStreamResult(image, "image/jpeg");
+            if (image != null)
+            {
+                return new FileStreamResult(image, "image/jpeg");
+            }
+            return null;
         }
 
         [Route("{id}/Inverted", Name = "InvertedContentRoute")]
         public ActionResult GetInverted(string id)
         {
             var image = DataAccess.GetInvertedContent(id);
-            if (image == null)
-                return null;
-            return new FileStreamResult(image, "image/jpeg");
+            if (image != null)
+            {
+                return new FileStreamResult(image, "image/jpeg");
+            }
+            return null;
         }
 
         private Stream GenerateThumbnail(MemoryStream image)
@@ -317,22 +335,6 @@ namespace artmdv_webapi.Areas.v2.Controllers
             thumb.Resize(400, thumb.Height * 400 / thumb.Width).Save(resizedStream);
             resizedStream.Position = 0;
             return resizedStream;
-        }
-
-        private static void CheckPassword(string password)
-        {
-            var fs = new FileStream("config.json", FileMode.Open, FileAccess.Read);
-            JObject config = null;
-            using (StreamReader streamReader = new StreamReader(fs))
-            using (JsonTextReader reader = new JsonTextReader(streamReader))
-            {
-                config = (JObject) JToken.ReadFrom(reader);
-            }
-            if (config?.GetValue("password").ToString() != password)
-            {
-                throw new HttpRequestException();
-            }
-
         }
 
         [Route("Featured")]
@@ -347,45 +349,10 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [HttpPost]
         public ActionResult SetFeaturedImage(string id, string password)
         {
-            CheckPassword(password);
+            Security.ValidatePassword(password);
             var command = new SetFeaturedImageCommand(id);
             SetFeaturedImageCommandHandler.Handle(command);
             return new OkResult();
         }
-    }
-
-    public class RevisionPaths
-    {
-        public string Thumb { get; set; }
-        public string Image { get; set; }
-        public string date { get; set; }
-        public string description { get; set; }
-        public string id { get; set; }
-    }
-
-    public class ImageUpdateDto
-    {
-        public ImageViewModel image { get; set; }
-        public string password { get; set; }
-    }
-
-    public class ImageRevisionDto
-    {
-        public string imageId { get; set; }
-        public IFormFile file { get; set; }
-        public string description { get; set; }
-        public string password { get; set; }
-    }
-
-    public class ImageUploadDto
-    {
-        public IFormFile file { get; set; }
-        public string title { get; set; }
-        public string description { get; set; }
-        public string tags { get; set; }
-        public string date { get; set; }
-        public string annotation { get; set; }
-        public string inverted { get; set; }
-        public string password { get; set; }
     }
 }

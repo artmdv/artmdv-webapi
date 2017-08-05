@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using artmdv_webapi.Areas.v2.Controllers;
+﻿using System.Collections.Generic;
 
 namespace artmdv_webapi.Areas.v2.Models
 {
@@ -10,7 +6,6 @@ namespace artmdv_webapi.Areas.v2.Models
     {
         public ImageViewModel Image { get; set; }
         public Links links { get; set; }
-        public string ForumPost { get; set; }
     }
 
     public class Links
