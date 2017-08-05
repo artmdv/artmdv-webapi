@@ -75,7 +75,6 @@ namespace artmdv_webapi.Areas.v2.Repository
 
         public string GenerateFileName(string fileName, string path)
         {
-            //TODO: write test
             var newFileName = Path.GetFileNameWithoutExtension(fileName);
             var generatedFileName = newFileName;
             var i = 1;
