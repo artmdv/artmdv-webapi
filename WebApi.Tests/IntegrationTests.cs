@@ -212,7 +212,7 @@ namespace WebApi.Tests
                         ContentId = ObjectId.GenerateNewId().ToString(),
                         Description = "revision description",
                         Filename = "revisionfilename",
-                        RevisionDate = DateTime.Now.ToString(),
+                        RevisionDate = DateTime.Now,
                         RevisionId = ObjectId.GenerateNewId().ToString(),
                         Thumb = new Thumbnail
                         {

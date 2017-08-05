@@ -98,7 +98,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
                     var revision = new Revision
                     {
                         Description = model.description,
-                        RevisionDate = DateTime.Now.ToString(),
+                        RevisionDate = DateTime.Now,
                         Thumb = new Thumbnail
                         {
                             Filename = $"thumb_{fileName}"
