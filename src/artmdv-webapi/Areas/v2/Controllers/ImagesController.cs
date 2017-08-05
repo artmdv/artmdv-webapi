@@ -186,7 +186,10 @@ namespace artmdv_webapi.Areas.v2.Controllers
         public ImageResponse GetImage(string id)
         {
             var image = DataAccess.Get(id);
-
+            if (image == null)
+            {
+                return null;
+            }
             return DecorateImage(image);
         }
 
