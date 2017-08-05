@@ -110,7 +110,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
                     var thumb = GenerateThumbnail(thumbStream);
                     var thumbId = DataAccess.CreateThumb(revision.Thumb.Filename, thumb);
                     revision.Thumb.ContentId = thumbId;
-                    revision.ContentId = DataAccess.CreateImage(fileStream, fileName);
+                    revision.Filename = DataAccess.CreateImageFile(fileStream, fileName);
                     revision.RevisionId = Guid.NewGuid().ToString();
 
                     var image = DataAccess.Get(model.imageId);
@@ -275,7 +275,11 @@ namespace artmdv_webapi.Areas.v2.Controllers
         public ActionResult GetImageContent(string id)
         {
             var image = DataAccess.GetImageContent(id);
-            return new FileStreamResult(image, "image/jpeg");
+            if (image != null)
+            {
+                return new FileStreamResult(image, "image/jpeg");
+            }
+            return null;
         }
 
         [HttpGet]
@@ -283,32 +287,44 @@ namespace artmdv_webapi.Areas.v2.Controllers
         public ActionResult GetContentById(string id)
         {
             var image = DataAccess.GetByContentId(id);
-            return new FileStreamResult(image, "image/jpeg");
+            if (image != null)
+            {
+                return new FileStreamResult(image, "image/jpeg");
+            }
+            return null;
         }
 
         [Route("{id}/Thumbnail", Name = "ThumbContentRoute")]
         public ActionResult GetThumb(string id)
         {
             var image = DataAccess.GetThumbContent(id);
-            return new FileStreamResult(image, "image/jpeg");
+            if (image != null)
+            {
+                return new FileStreamResult(image, "image/jpeg");
+            }
+            return null;
         }
 
         [Route("{id}/Annotation", Name = "AnnotationContentRoute")]
         public ActionResult GetAnnotation(string id)
         {
             var image = DataAccess.GetAnnotationContent(id);
-            if (image == null)
-                return null;
-            return new FileStreamResult(image, "image/jpeg");
+            if (image != null)
+            {
+                return new FileStreamResult(image, "image/jpeg");
+            }
+            return null;
         }
 
         [Route("{id}/Inverted", Name = "InvertedContentRoute")]
         public ActionResult GetInverted(string id)
         {
             var image = DataAccess.GetInvertedContent(id);
-            if (image == null)
-                return null;
-            return new FileStreamResult(image, "image/jpeg");
+            if (image != null)
+            {
+                return new FileStreamResult(image, "image/jpeg");
+            }
+            return null;
         }
 
         private Stream GenerateThumbnail(MemoryStream image)

@@ -8,7 +8,7 @@ namespace artmdv_webapi.Areas.v2.Repository
     public interface IImageRepository: IRepository
     {
         string Create(Image image, Stream imagecontent, Stream thumbContent);
-        string CreateImage(Stream imageContent, string fileName);
+        string CreateImageFile(Stream imageContent, string fileName);
         string CreateThumb(string filename, Stream thumbContent);
         void Delete(string id);
         Image Get(string id);
