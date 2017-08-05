@@ -41,6 +41,7 @@ namespace artmdv_webapi2
             services.AddTransient<IHandler<SetFeaturedImageCommand>, SetFeaturedImageHandler>();
             services.AddTransient<IQuery<FeaturedImageViewModel>, FeaturedImageQuery>();
             services.AddTransient<IFile, LocalFile>();
+            services.AddTransient<IDirectory, LocalDirectory>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
