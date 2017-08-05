@@ -39,8 +39,8 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="1.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="1.1.2" />
-    <PackageReference Include="MongoDB.Driver" Version="2.4.3" />
-    <PackageReference Include="MongoDB.Driver.GridFS" Version="2.3.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.4.4" />
+    <PackageReference Include="MongoDB.Driver.GridFS" Version="2.4.4" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="1.1.2" />
     <PackageReference Include="ChyImageProcessorCore" Version="1.0.0-alpha1031" />
     <PackageReference Include="StatsdClient" Version="3.0.86" />
