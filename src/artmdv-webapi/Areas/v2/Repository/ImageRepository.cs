@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using artmdv_webapi.Areas.v2.Infrastructure;
 using artmdv_webapi.Areas.v2.Models;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -14,14 +15,18 @@ namespace artmdv_webapi.Areas.v2.Repository
 {
     public class ImageRepository : IImageRepository
     {
+        public IFile File { get; }
+        public IDirectory Directory { get; }
         private GridFSBucket GridFs { get; set; }
         public IMongoDatabase Database { get; set; }
         private IMongoCollection<Image> Collection { get; set; }
 
         private string ImageDirectory { get; set; }
 
-        public ImageRepository()
+        public ImageRepository(IFile file, IDirectory directory)
         {
+            File = file;
+            Directory = directory;
             var client = new MongoClient("mongodb://localhost:27017");
             Database = client.GetDatabase("v2");
             Collection = Database.GetCollection<Image>("Images");
@@ -34,7 +39,7 @@ namespace artmdv_webapi.Areas.v2.Repository
             {
                 config = (JObject)JToken.ReadFrom(reader);
             }
-            ImageDirectory = config?.GetValue("ImageDirectory").ToString();
+            ImageDirectory = config?.GetValue("ImageDirectory")?.ToString();
             if (!Directory.Exists(ImageDirectory))
             {
                 Directory.CreateDirectory(ImageDirectory);
@@ -58,7 +63,7 @@ namespace artmdv_webapi.Areas.v2.Repository
 
         public string CreateImageFile(Stream imageContent, string fileName)
         {
-            var generatedFileName = GenerateFileName(fileName);
+            var generatedFileName = GenerateFileName(fileName, ImageDirectory);
             using (var fileStream = File.Create($"{ImageDirectory}/{generatedFileName}"))
             {
                 imageContent.Position = 0;
@@ -68,13 +73,12 @@ namespace artmdv_webapi.Areas.v2.Repository
             return generatedFileName;
         }
 
-        public string GenerateFileName(string fileName)
+        public string GenerateFileName(string fileName, string path)
         {
-            //TODO: write test
             var newFileName = Path.GetFileNameWithoutExtension(fileName);
             var generatedFileName = newFileName;
             var i = 1;
-            while (File.Exists($"{ImageDirectory}/{generatedFileName}{Path.GetExtension(fileName)}"))
+            while (File.Exists($"{path}/{generatedFileName}{Path.GetExtension(fileName)}"))
             {
                 generatedFileName = $"{newFileName}({i++})";
             }
