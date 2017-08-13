@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.IO;
 
 namespace artmdv_webapi.Areas.v2.Infrastructure
 {
@@ -10,5 +6,6 @@ namespace artmdv_webapi.Areas.v2.Infrastructure
     {
         bool Exists(string path);
         FileStream Create(string path);
+        FileStream Open(string path);
     }
 }

@@ -2,14 +2,23 @@
 
 namespace artmdv_webapi.Areas.v2.Core
 {
-    public class Security
+    public class SecurityHandler: ISecurityHandler
     {
-        public static void ValidatePassword(string password)
+        public IConfigurationManager ConfigurationManager { get; }
+
+        public SecurityHandler(IConfigurationManager configurationManager)
         {
-            if (ConfigurationManager.GetPassword() != password)
-            {
-                throw new HttpRequestException();
-            }
+            ConfigurationManager = configurationManager;
         }
+
+        public bool IsValidPassword(string password)
+        {
+            return ConfigurationManager.GetPassword() == password;
+        }
+    }
+
+    public interface ISecurityHandler
+    {
+        bool IsValidPassword(string password);
     }
 }

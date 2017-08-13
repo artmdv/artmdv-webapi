@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using artmdv_webapi.Areas.v2.Controllers;
 using artmdv_webapi.Areas.v2.Core;
+using artmdv_webapi.Areas.v2.Infrastructure;
 using artmdv_webapi.Areas.v2.Models;
 using Microsoft.AspNetCore.Http.Internal;
 using MongoDB.Bson;
@@ -33,7 +34,7 @@ namespace WebApi.Tests
         {
             date = DateTime.Now.Date.ToString(),
             description = "integrationTestDescription",
-            password = ConfigurationManager.GetPassword(),
+            password = new ConfigurationManager(new LocalFile()).GetPassword(),
             tags = "integrationTestTag",
             title = "integrationTestTitle"
         };
@@ -71,7 +72,7 @@ namespace WebApi.Tests
             var updateImageDto = new ImageUpdateDto
             {
                 image = savedImage.Image,
-                password = ConfigurationManager.GetPassword()
+                password = new ConfigurationManager(new LocalFile()).GetPassword(),
             };
             updateImageDto.image.Annotation = ObjectId.GenerateNewId().ToString();
             updateImageDto.image.Inverted = ObjectId.GenerateNewId().ToString();
@@ -224,7 +225,7 @@ namespace WebApi.Tests
                     Thumb = new Thumbnail { ContentId = ObjectId.GenerateNewId().ToString(), Filename = "updateThumbFilename"},
                     Title = "updatedTitle"
                 },
-                password = ConfigurationManager.GetPassword()
+                password = new ConfigurationManager(new LocalFile()).GetPassword(),
             };
 
             await UpdateImage(update).ConfigureAwait(false);
@@ -272,7 +273,7 @@ namespace WebApi.Tests
         [Test]
         public async Task GetFeaturedImageReturnsTheOneThatWasSet()
         {
-            var password = ConfigurationManager.GetPassword();
+            var password = new ConfigurationManager(new LocalFile()).GetPassword();
             var imageId = ObjectId.GenerateNewId();
             var postResponse = await _httpClient.PostAsync($"v2/Images/Featured/{imageId}/{password}", new StringContent("")).ConfigureAwait(false);
 
@@ -309,7 +310,7 @@ namespace WebApi.Tests
             content.Add(new StringContent(_newImage.date ?? string.Empty), "date");
             content.Add(new StringContent(_newImage.annotation ?? string.Empty), "annotation");
             content.Add(new StringContent(_newImage.inverted ?? string.Empty), "inverted");
-            content.Add(new StringContent(ConfigurationManager.GetPassword()), "password");
+            content.Add(new StringContent(new ConfigurationManager(new LocalFile()).GetPassword()), "password");
             var response = await _httpClient.PostAsync("v2/Images", content).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
@@ -352,7 +353,7 @@ namespace WebApi.Tests
 
         private async Task DeleteImage(string id)
         {
-            var response = await _httpClient.DeleteAsync($"v2/Images/{id}/{ConfigurationManager.GetPassword()}").ConfigureAwait(false);
+            var response = await _httpClient.DeleteAsync($"v2/Images/{id}/{new ConfigurationManager(new LocalFile()).GetPassword()}").ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
                 throw new Exception($"Error in {nameof(DeleteImage)}. Status code: {response.StatusCode}");
@@ -367,7 +368,7 @@ namespace WebApi.Tests
             content.Add(new ByteArrayContent(Convert.FromBase64String(base64image)), "file", "file.png");
             content.Add(new StringContent(description), "description");
             content.Add(new StringContent(id), "imageId");
-            content.Add(new StringContent(ConfigurationManager.GetPassword()), "password");
+            content.Add(new StringContent(new ConfigurationManager(new LocalFile()).GetPassword()), "password");
             var response = await _httpClient.PostAsync("v2/Images/Revision", content).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
@@ -384,7 +385,7 @@ namespace WebApi.Tests
 
         private async Task DeleteRevision(Tuple<string, string> revision)
         {
-            var response = await _httpClient.DeleteAsync($"v2/Images/{revision.Item1}/revision/{revision.Item2}/{ConfigurationManager.GetPassword()}").ConfigureAwait(false);
+            var response = await _httpClient.DeleteAsync($"v2/Images/{revision.Item1}/revision/{revision.Item2}/{new ConfigurationManager(new LocalFile()).GetPassword()}").ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
                 throw new Exception($"Error in {nameof(DeleteRevision)}. Status code: {response.StatusCode}");

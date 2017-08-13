@@ -25,12 +25,18 @@ namespace artmdv_webapi.Areas.v2.Controllers
         private IImageRepository DataAccess { get; set; }
         public IQuery<FeaturedImageViewModel> FeaturedImageQuery { get; }
         public IHandler<SetFeaturedImageCommand> SetFeaturedImageCommandHandler { get; }
+        public ISecurityHandler SecurityHandler { get; }
 
-        public ImagesController(IImageRepository dataAccess, IQuery<FeaturedImageViewModel> featuredImageQuery, IHandler<SetFeaturedImageCommand> setFeaturedImageCommandHandler)
+        public ImagesController(
+            IImageRepository dataAccess, 
+            IQuery<FeaturedImageViewModel> featuredImageQuery, 
+            IHandler<SetFeaturedImageCommand> setFeaturedImageCommandHandler,
+            ISecurityHandler securityHandler)
         {
             DataAccess = dataAccess;
             FeaturedImageQuery = featuredImageQuery;
             SetFeaturedImageCommandHandler = setFeaturedImageCommandHandler;
+            SecurityHandler = securityHandler;
         }
 
         [HttpPost]
@@ -38,7 +44,10 @@ namespace artmdv_webapi.Areas.v2.Controllers
         {
             try
             {
-                Security.ValidatePassword(model?.password);
+                if (!SecurityHandler.IsValidPassword(model?.password))
+                {
+                    throw new UnauthorizedAccessException();
+                }
 
                 if (model?.file?.Length > 0)
                 {
@@ -85,7 +94,11 @@ namespace artmdv_webapi.Areas.v2.Controllers
         {
             try
             {
-                Security.ValidatePassword(model?.password);
+                if (!SecurityHandler.IsValidPassword(model?.password))
+                {
+                    throw new UnauthorizedAccessException();
+                }
+
                 if (model?.file?.Length > 0 && !string.IsNullOrWhiteSpace(model.imageId))
                 {
                     var fileName = ContentDispositionHeaderValue
@@ -136,7 +149,11 @@ namespace artmdv_webapi.Areas.v2.Controllers
         {
             try
             {
-                Security.ValidatePassword(imageVm?.password);
+                if (!SecurityHandler.IsValidPassword(imageVm?.password))
+                {
+                    throw new UnauthorizedAccessException();
+                }
+
                 if (imageVm?.image != null)
                 {
                     var image = imageVm.image.ToImage();
@@ -156,7 +173,11 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [Route("{id}/{password}")]
         public dynamic DeleteImage(string password, string id)
         {
-            Security.ValidatePassword(password);
+            if (!SecurityHandler.IsValidPassword(password))
+            {
+                throw new UnauthorizedAccessException();
+            }
+
             DataAccess.Delete(id);
             return null;
         }
@@ -167,7 +188,11 @@ namespace artmdv_webapi.Areas.v2.Controllers
         {
             try
             {
-                Security.ValidatePassword(password);
+                if (!SecurityHandler.IsValidPassword(password))
+                {
+                    throw new UnauthorizedAccessException();
+                }
+
                 var image = DataAccess.Get(id);
                 image.Revisions.Remove(image.Revisions.Single(x => x.RevisionId == revisionId));
                 DataAccess.Update(image);
@@ -352,7 +377,11 @@ namespace artmdv_webapi.Areas.v2.Controllers
         [HttpPost]
         public ActionResult SetFeaturedImage(string id, string password)
         {
-            Security.ValidatePassword(password);
+            if (!SecurityHandler.IsValidPassword(password))
+            {
+                throw new UnauthorizedAccessException();
+            }
+
             var command = new SetFeaturedImageCommand(id);
             SetFeaturedImageCommandHandler.Handle(command);
             return new OkResult();
