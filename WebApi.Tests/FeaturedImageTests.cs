@@ -1,5 +1,6 @@
 ﻿using System;
 using artmdv_webapi.Areas.v2.Command;
+using artmdv_webapi.Areas.v2.CommandHandlers;
 using artmdv_webapi.Areas.v2.Models;
 using artmdv_webapi.Areas.v2.Query;
 using artmdv_webapi.Areas.v2.Repository;
@@ -36,7 +37,7 @@ namespace WebApi.Tests
         {
             var repositoryMock = new Mock<IFeaturedImageRepository>();
             var handler = new SetFeaturedImageHandler(repositoryMock.Object);
-            handler.Handle(new SetFeaturedImageCommand(ObjectId.GenerateNewId().ToString()));
+            handler.HandleAsync(new SetFeaturedImageCommand(ObjectId.GenerateNewId().ToString()));
 
             repositoryMock.Verify(x=>x.Save(It.IsAny<FeaturedImage>()));
         }
@@ -46,7 +47,7 @@ namespace WebApi.Tests
         {
             var repositoryMock = new Mock<IFeaturedImageRepository>();
             var handler = new SetFeaturedImageHandler(repositoryMock.Object);
-            handler.Handle(new SetFeaturedImageCommand(ObjectId.GenerateNewId().ToString()));
+            handler.HandleAsync(new SetFeaturedImageCommand(ObjectId.GenerateNewId().ToString()));
 
             repositoryMock.Verify(x=>x.Save(It.Is<FeaturedImage>(img=>img.ImageId != null && img.ImageId != ObjectId.Empty && img.Date != null && img.Date != default(DateTime) )));
         }

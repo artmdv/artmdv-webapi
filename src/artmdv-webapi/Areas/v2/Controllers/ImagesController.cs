@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using artmdv_webapi.Areas.v2.Command;
+using artmdv_webapi.Areas.v2.CommandHandlers;
+using artmdv_webapi.Areas.v2.Commands;
 using artmdv_webapi.Areas.v2.Core;
 using artmdv_webapi.Areas.v2.Models;
 using artmdv_webapi.Areas.v2.Query;
@@ -24,18 +26,24 @@ namespace artmdv_webapi.Areas.v2.Controllers
     {
         private IImageRepository DataAccess { get; set; }
         public IQuery<FeaturedImageViewModel> FeaturedImageQuery { get; }
-        public IHandler<SetFeaturedImageCommand> SetFeaturedImageCommandHandler { get; }
+        public IHandler<SetFeaturedImageCommand, object> SetFeaturedImageCommandHandler { get; }
+        public IHandler<UploadImageCommand, string> UploadImageCommandHandler { get; }
+        public IHandler<UploadImageRevisionCommand, string> UploadImageRevisionCommandHandler { get; }
         public ISecurityHandler SecurityHandler { get; }
 
         public ImagesController(
             IImageRepository dataAccess, 
             IQuery<FeaturedImageViewModel> featuredImageQuery, 
-            IHandler<SetFeaturedImageCommand> setFeaturedImageCommandHandler,
+            IHandler<SetFeaturedImageCommand, object> setFeaturedImageCommandHandler,
+            IHandler<UploadImageCommand, string> uploadImageCommandHandler,
+            IHandler<UploadImageRevisionCommand, string> uploadImageRevisionCommandHandler,
             ISecurityHandler securityHandler)
         {
             DataAccess = dataAccess;
             FeaturedImageQuery = featuredImageQuery;
             SetFeaturedImageCommandHandler = setFeaturedImageCommandHandler;
+            UploadImageCommandHandler = uploadImageCommandHandler;
+            UploadImageRevisionCommandHandler = uploadImageRevisionCommandHandler;
             SecurityHandler = securityHandler;
         }
 
@@ -49,43 +57,16 @@ namespace artmdv_webapi.Areas.v2.Controllers
                     throw new UnauthorizedAccessException();
                 }
 
-                if (model?.file?.Length > 0)
-                {
-                    var fileName = ContentDispositionHeaderValue
-                        .Parse(model.file.ContentDisposition)
-                        .FileName
-                        .Trim('"');
+                var cmd = new UploadImageCommand(model);
 
-                    var fileStream = model.file.OpenReadStream();
+                var imageId = UploadImageCommandHandler.HandleAsync(cmd);
 
-                    var image = new Image
-                    {
-                        Filename = fileName,
-                        Description = model.description,
-                        Title = model.title,
-                        Tags = model.tags.Split(','),
-                        Date = model.date,
-                        Thumb = new Thumbnail
-                        {
-                            Filename = $"thumb_{fileName}"
-                        },
-                        Annotation = model.annotation,
-                        Inverted = model.inverted
-                    };
-                    var thumbStream = new MemoryStream();
-                    fileStream.CopyTo(thumbStream);
-                    var thumb = GenerateThumbnail(thumbStream);
-
-                    var imageId = DataAccess.Create(image, fileStream, thumb);
-
-                    return GetImage(imageId.ToString());
-                }
+                return GetImage(imageId.ToString());
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-            return null;
         }
 
         [HttpPost]
@@ -99,49 +80,20 @@ namespace artmdv_webapi.Areas.v2.Controllers
                     throw new UnauthorizedAccessException();
                 }
 
-                if (model?.file?.Length > 0 && !string.IsNullOrWhiteSpace(model.imageId))
+                var cmd = new UploadImageRevisionCommand(model);
+
+                UploadImageRevisionCommandHandler.HandleAsync(cmd);
+                if (model == null)
                 {
-                    var fileName = ContentDispositionHeaderValue
-                        .Parse(model.file.ContentDisposition)
-                        .FileName
-                        .Trim('"');
-
-                    var fileStream = model.file.OpenReadStream();
-
-                    var revision = new Revision
-                    {
-                        Description = model.description,
-                        RevisionDate = DateTime.Now,
-                        Thumb = new Thumbnail
-                        {
-                            Filename = $"thumb_{fileName}"
-                        },
-                        Filename = fileName
-                    };
-                    var thumbStream = new MemoryStream();
-                    fileStream.CopyTo(thumbStream);
-                    var thumb = GenerateThumbnail(thumbStream);
-                    var thumbId = DataAccess.CreateThumb(revision.Thumb.Filename, thumb);
-                    revision.Thumb.ContentId = thumbId;
-                    revision.Filename = DataAccess.CreateImageFile(fileStream, fileName);
-                    revision.RevisionId = Guid.NewGuid().ToString();
-
-                    var image = DataAccess.Get(model.imageId);
-                    if (image.Revisions == null)
-                    {
-                        image.Revisions = new List<Revision>();
-                    }
-                    image.Revisions.Add(revision);
-
-                    return DataAccess.Update(image);
+                    return null;
                 }
+                return GetImage(model.imageId);
             }
 
             catch (Exception ex)
             {
                 return ex.Message;
             }
-            return null;
         }
 
         [HttpPut]
@@ -355,15 +307,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
             return null;
         }
 
-        private Stream GenerateThumbnail(MemoryStream image)
-        {
-            image.Position = 0;
-            var resizedStream = new MemoryStream();
-            var thumb = new ImageProcessorCore.Image(image);
-            thumb.Resize(400, thumb.Height * 400 / thumb.Width).Save(resizedStream);
-            resizedStream.Position = 0;
-            return resizedStream;
-        }
+        
 
         [Route("Featured")]
         [HttpGet]
@@ -383,7 +327,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
             }
 
             var command = new SetFeaturedImageCommand(id);
-            SetFeaturedImageCommandHandler.Handle(command);
+            SetFeaturedImageCommandHandler.HandleAsync(command);
             return new OkResult();
         }
     }

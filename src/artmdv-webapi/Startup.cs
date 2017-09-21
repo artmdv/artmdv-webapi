@@ -1,5 +1,7 @@
 ﻿using System.IO;
 using artmdv_webapi.Areas.v2.Command;
+using artmdv_webapi.Areas.v2.CommandHandlers;
+using artmdv_webapi.Areas.v2.Commands;
 using artmdv_webapi.Areas.v2.Core;
 using artmdv_webapi.Areas.v2.Infrastructure;
 using artmdv_webapi.Areas.v2.Models;
@@ -39,7 +41,9 @@ namespace artmdv_webapi2
             services.AddCors(x => x.AddPolicy("default", y => y.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
             services.AddSingleton<IImageRepository, ImageRepository>();
             services.AddTransient<IFeaturedImageRepository, FeaturedImageRepository>();
-            services.AddTransient<IHandler<SetFeaturedImageCommand>, SetFeaturedImageHandler>();
+            services.AddTransient<IHandler<SetFeaturedImageCommand, object>, SetFeaturedImageHandler>();
+            services.AddTransient<IHandler<UploadImageCommand, string>, UploadImageCommandHandler>();
+            services.AddTransient<IHandler<UploadImageRevisionCommand, object>, UploadImageRevisionCommandHandler>();
             services.AddTransient<IQuery<FeaturedImageViewModel>, FeaturedImageQuery>();
             services.AddTransient<IFile, LocalFile>();
             services.AddTransient<IDirectory, LocalDirectory>();
