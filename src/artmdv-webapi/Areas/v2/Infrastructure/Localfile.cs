@@ -18,5 +18,13 @@ namespace artmdv_webapi.Areas.v2.Infrastructure
         {
             return File.Open(path, FileMode.Open, FileAccess.Read);
         }
+
+        public void Delete(string filename)
+        {
+            if (File.Exists(filename))
+            {
+                File.Delete(filename);
+            }
+        }
     }
 }

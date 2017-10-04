@@ -21,10 +21,13 @@ namespace artmdv_webapi.Areas.v2.Command
                 var filename = ContentDispositionHeaderValue
                     .Parse(model.file.ContentDisposition)
                     .FileName
-                    .Trim('"');
+                    .ToString().Trim('"');
+
+                File = new MemoryStream();
 
                 var fileStream = model.file.OpenReadStream();
                 fileStream.CopyTo(File);
+                File.Position = 0;
                 fileStream.Dispose();
 
                 Image = new Image

@@ -175,7 +175,7 @@ namespace artmdv_webapi.Areas.v2.Repository
             {
                 return await Collection.Find(x=>x.Tags != null).ToListAsync().ConfigureAwait(false);
             }
-            return await Collection.Find(x=>x.Tags.Any(y=>tag.Split(',').Contains(y))).ToListAsync().ConfigureAwait(false);
+            return await Collection.Find(x=>x.Tags.Any(y=>tag.Split(',', StringSplitOptions.RemoveEmptyEntries).Contains(y))).ToListAsync().ConfigureAwait(false);
         }
 
         public void Delete(string id)
@@ -183,7 +183,13 @@ namespace artmdv_webapi.Areas.v2.Repository
             var image = Get(id);
             if (image != null)
             {
-                GridFs.Delete(ObjectId.Parse(image.ContentId));
+                if (image.ContentId != null)
+                {
+                    GridFs.Delete(ObjectId.Parse(image.ContentId));
+                }
+                
+                File.Delete(image.Filename);
+
                 GridFs.Delete(ObjectId.Parse(image.Thumb.ContentId));
 
                 var builder = Builders<Image>.Filter;

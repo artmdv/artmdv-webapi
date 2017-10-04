@@ -7,5 +7,6 @@ namespace artmdv_webapi.Areas.v2.Infrastructure
         bool Exists(string path);
         FileStream Create(string path);
         FileStream Open(string path);
+        void Delete(string imageFilename);
     }
 }

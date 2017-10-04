@@ -28,7 +28,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
         public IQuery<FeaturedImageViewModel> FeaturedImageQuery { get; }
         public IHandler<SetFeaturedImageCommand, object> SetFeaturedImageCommandHandler { get; }
         public IHandler<UploadImageCommand, string> UploadImageCommandHandler { get; }
-        public IHandler<UploadImageRevisionCommand, string> UploadImageRevisionCommandHandler { get; }
+        public IHandler<UploadImageRevisionCommand, object> UploadImageRevisionCommandHandler { get; }
         public ISecurityHandler SecurityHandler { get; }
 
         public ImagesController(
@@ -36,7 +36,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
             IQuery<FeaturedImageViewModel> featuredImageQuery, 
             IHandler<SetFeaturedImageCommand, object> setFeaturedImageCommandHandler,
             IHandler<UploadImageCommand, string> uploadImageCommandHandler,
-            IHandler<UploadImageRevisionCommand, string> uploadImageRevisionCommandHandler,
+            IHandler<UploadImageRevisionCommand, object> uploadImageRevisionCommandHandler,
             ISecurityHandler securityHandler)
         {
             DataAccess = dataAccess;
@@ -48,7 +48,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
         }
 
         [HttpPost]
-        public ImageResponse UploadImage(ImageUploadDto model)
+        public async Task<ImageResponse> UploadImage(ImageUploadDto model)
         {
             try
             {
@@ -59,9 +59,9 @@ namespace artmdv_webapi.Areas.v2.Controllers
 
                 var cmd = new UploadImageCommand(model);
 
-                var imageId = UploadImageCommandHandler.HandleAsync(cmd);
+                var imageId = await UploadImageCommandHandler.HandleAsync(cmd).ConfigureAwait(false);
 
-                return GetImage(imageId.ToString());
+                return await Task.FromResult(GetImage(imageId.ToString())).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -71,7 +71,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
 
         [HttpPost]
         [Route("Revision")]
-        public dynamic ImageRevision(ImageRevisionDto model)
+        public ImageResponse ImageRevision(ImageRevisionDto model)
         {
             try
             {
@@ -83,16 +83,13 @@ namespace artmdv_webapi.Areas.v2.Controllers
                 var cmd = new UploadImageRevisionCommand(model);
 
                 UploadImageRevisionCommandHandler.HandleAsync(cmd);
-                if (model == null)
-                {
-                    return null;
-                }
-                return GetImage(model.imageId);
+                
+                return GetImage(model?.imageId);
             }
 
             catch (Exception ex)
             {
-                return ex.Message;
+                throw ex;
             }
         }
 
