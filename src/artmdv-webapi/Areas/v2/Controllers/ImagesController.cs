@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using artmdv_webapi.Areas.v2.Command;
 using artmdv_webapi.Areas.v2.CommandHandlers;
@@ -94,7 +95,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
         }
 
         [HttpPut]
-        public dynamic UpdateImage([FromBody] ImageUpdateDto imageVm)
+        public ActionResult UpdateImage([FromBody] ImageUpdateDto imageVm)
         {
             try
             {
@@ -108,13 +109,14 @@ namespace artmdv_webapi.Areas.v2.Controllers
                     var image = imageVm.image.ToImage();
                     var originalImage = DataAccess.Get(image.Id.ToString());
                     image.Revisions = originalImage.Revisions;
-                    return DataAccess.Update(image);
+                    DataAccess.Update(image);
+                    return new OkObjectResult(GetImage(imageVm.image.Id));
                 }
-                return null;
+                return new BadRequestObjectResult("invalid image for update");
             }
             catch (Exception ex)
             {
-                return ex.Message;
+                throw ex;
             }
         }
 
@@ -170,7 +172,14 @@ namespace artmdv_webapi.Areas.v2.Controllers
         private ImageResponse DecorateImage(Image image)
         {
             var uri = new Uri(Request.GetDisplayUrl());
+            
             var host = uri.AbsoluteUri.Replace(uri.LocalPath, "");
+
+            if (!string.IsNullOrEmpty(uri.Query))
+            {
+                host = host.Replace(uri.Query, "");
+            }
+
             var imageRelativePath = DataAccess.GetPath(image);
             var imagePath = imageRelativePath != null
                 ? $"{host}/{imageRelativePath}"
@@ -256,7 +265,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
             {
                 return new FileStreamResult(image, "image/jpeg");
             }
-            return null;
+            return new NotFoundResult();
         }
 
         [HttpGet]
@@ -268,7 +277,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
             {
                 return new FileStreamResult(image, "image/jpeg");
             }
-            return null;
+            return new NotFoundResult();
         }
 
         [Route("{id}/Thumbnail", Name = "ThumbContentRoute")]
@@ -279,7 +288,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
             {
                 return new FileStreamResult(image, "image/jpeg");
             }
-            return null;
+            return new NotFoundResult();
         }
 
         [Route("{id}/Annotation", Name = "AnnotationContentRoute")]
@@ -290,7 +299,7 @@ namespace artmdv_webapi.Areas.v2.Controllers
             {
                 return new FileStreamResult(image, "image/jpeg");
             }
-            return null;
+            return new NotFoundResult();
         }
 
         [Route("{id}/Inverted", Name = "InvertedContentRoute")]
@@ -301,10 +310,8 @@ namespace artmdv_webapi.Areas.v2.Controllers
             {
                 return new FileStreamResult(image, "image/jpeg");
             }
-            return null;
+            return new NotFoundResult();
         }
-
-        
 
         [Route("Featured")]
         [HttpGet]

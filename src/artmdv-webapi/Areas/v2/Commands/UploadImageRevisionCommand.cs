@@ -19,6 +19,8 @@ namespace artmdv_webapi.Areas.v2.Commands
         {
             if (model?.file?.Length > 0)
             {
+                var datenow = DateTime.Now;
+
                 var filename = ContentDispositionHeaderValue
                     .Parse(model.file.ContentDisposition)
                     .FileName
@@ -37,7 +39,7 @@ namespace artmdv_webapi.Areas.v2.Commands
                 Revision = new Revision
                 {
                     Description = model.description,
-                    RevisionDate = DateTime.Now,
+                    RevisionDate = new DateTime(datenow.Year, datenow.Month, datenow.Day, datenow.Hour, datenow.Minute, datenow.Second),
                     Thumb = new Thumbnail
                     {
                         Filename = $"thumb_{filename}"

@@ -32,7 +32,7 @@ namespace WebApi.Tests
 
         private ImageUploadDto _newImage = new ImageUploadDto
         {
-            date = DateTime.Now.Date.ToString(),
+            date = DateTime.Now.Date.ToString("O"),
             description = "integrationTestDescription",
             password = new ConfigurationManager(new LocalFile()).GetPassword(),
             tags = "integrationTestTag",
@@ -96,9 +96,9 @@ namespace WebApi.Tests
             imageJson.Append(image.Image.Id);
             imageJson.Append(@""",""type"":0,""filename"":""");
             imageJson.Append(image.Image.Filename);
-            imageJson.Append(@""",""contentId"":""");
-            imageJson.Append(image.Image.ContentId);
-            imageJson.Append(@""",""description"":""");
+            imageJson.Append(@""",""contentId"":");
+            imageJson.Append("null");
+            imageJson.Append(@",""description"":""");
             imageJson.Append(image.Image.Description);
             imageJson.Append(@""",""title"":""");
             imageJson.Append(image.Image.Title);
@@ -115,24 +115,23 @@ namespace WebApi.Tests
             imageJson.Append(@"""],""date"":""");
             imageJson.Append(image.Image.Date);
             imageJson.Append(@""",""revisions"":[{""revisionDate"":""");
-            imageJson.Append(image.Image.Revisions.Single().RevisionDate);
+            imageJson.Append(image.Image.Revisions.Single().RevisionDate.ToString("yyyy-MM-ddTHH:mm:ssK"));
             imageJson.Append(@""",""revisionId"":""");
             imageJson.Append(image.Image.Revisions.Single().RevisionId);
             imageJson.Append(@""",""filename"":""");
             imageJson.Append(image.Image.Revisions.Single().Filename);
-            imageJson.Append(@""",""contentId"":""");
-            imageJson.Append(image.Image.Revisions.Single().ContentId);
-            imageJson.Append(@""",""thumb"":{""type"":1,""filename"":""");
+            imageJson.Append(@""",""contentId"":");
+            imageJson.Append("null");
+            imageJson.Append(@",""thumb"":{""type"":1,""filename"":""");
             imageJson.Append(image.Image.Revisions.Single().Thumb.Filename);
             imageJson.Append(@""",""contentId"":""");
             imageJson.Append(image.Image.Revisions.Single().Thumb.ContentId);
             imageJson.Append(@"""},""description"":""");
             imageJson.Append(image.Image.Revisions.Single().Description);
-            imageJson.Append(@"""}]},""links"":{""imageContent"":""http://localhost:5004?tag=");
-            imageJson.Append(String.Join(",", image.Image.Tags));
+            imageJson.Append(@"""}]},""links"":{""imageContent"":""http://localhost:5004");
             imageJson.Append(@"/Images/");
-            imageJson.Append(image.Image.Id);
-            imageJson.Append(@".png"",""thumbnailContent"":""http://localhost:5004/v2/Images/");
+            imageJson.Append(image.Image.Filename);
+            imageJson.Append(@""",""thumbnailContent"":""http://localhost:5004/v2/Images/");
             imageJson.Append(image.Image.Id);
             imageJson.Append(@"/Thumbnail"",""annotationContent"":""http://localhost:5004/v2/Images/");
             imageJson.Append(image.Image.Id);
@@ -140,12 +139,11 @@ namespace WebApi.Tests
             imageJson.Append(image.Image.Id);
             imageJson.Append(@"/Inverted"",""revisions"":[{""thumb"":""http://localhost:5004/v2/Images/Content/");
             imageJson.Append(image.Image.Revisions.Single().Thumb.ContentId);
-            imageJson.Append(@""",""image"":""http://localhost:5004?tag=");
-            imageJson.Append(String.Join(",", image.Image.Tags));
+            imageJson.Append(@""",""image"":""http://localhost:5004");
             imageJson.Append(@"/Images/");
-            imageJson.Append(image.Image.Revisions.Single().ContentId);
-            imageJson.Append(@".png"",""date"":""");
-            imageJson.Append(image.Image.Revisions.Single().RevisionDate);
+            imageJson.Append(image.Image.Revisions.Single().Filename);
+            imageJson.Append(@""",""date"":""");
+            imageJson.Append(image.Image.Revisions.Single().RevisionDate.ToString("yyyy-MM-ddTHH:mm:ssK"));
             imageJson.Append(@""",""description"":""");
             imageJson.Append(image.Image.Revisions.Single().Description);
             imageJson.Append(@""",""id"":""");
@@ -158,7 +156,7 @@ namespace WebApi.Tests
         [Test]
         public async Task GetImageThumbnail()
         {
-            var thumbnailBase64 = "iVBORw0KGgoAAAANSUhEUgAAAZAAAAGQCAYAAACAvzbMAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAFtUlEQVR4nO3XsQ2DUBAFQUBU4nrcrCuEAoi8yYmvmQpedKs7P7/vtQEvsU8PWMPj6jmDxTE9AIB3EhAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIBEQABIBASAREAASAQEgERAAEgEBIDmnBwD/uKYHrGGfHrAGHwgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICACJgACQCAgAiYAAkAgIAImAAJAICADJDa28CEJQqEfiAAAAAElFTkSuQmCC";
+            var thumbnailBase64 = "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GxACBAiMChiQugEhQIDAqIABqRsQAgQIjAoYkLoBIUCAwKiAAakbEAIECIwKGJC6ASFAgMCogAGpGxACBAiMChiQugEhQIDAqIABqRsQAgQIjAoYkLoBIUCAwKiAAakbEAIECIwKGJC6ASFAgMCogAGpGxACBAiMChiQugEhQIDAqIABqRuQIwQIbAoYkLoBIUCAwKiAAakbEAIECIwKGJC6ASFAgMCogAGpGxACBAiMChiQugEhQIDAqIABqRsQAgQIjAoYkLoBIUCAwKiAAakbEAIECIwKGJC6ASFAgMCogAGpGxACBAiMChiQugEhQIDAqIABqRsQAgQIjAoYkLoBIUCAwKiAAakbEAIECIwKGJC6ASFAgMCogAGpGxACBAiMChiQugEhQIDAqIABqRsQAgQIjAoYkLoBIUCAwKiAAakbEAIECJzNGJC6ASFAgMCogAGpGxACBAiMChiQugEhQIDAqIABqRsQAgQIjAoYkLoBIUCAwKiAAakbEAIECIwKGJC6ASFAgMCogAGpGxACBAiMChiQugEhQIDAqIABqRsQAgQIjAoYkLoBIUCAwKiAAakbEAIECIwKGJC6ASFAgMCogAGpGxACBAiMChiQugEhQIDAqIABqRsQAgQIjAoYkLoBIUCAwKiAAakbEAIECIwKGJC6ASFAgMCogAGpGxACBAiMChiQugE5QoDApoABqRsQAgQIjAoYkLoBIUCAwKiAAakbEAIECIwKGJC6ASFAgMCogAGpGxACBAiMChiQugEhQIDAqIABqRsQAgQIjAoYkLoBIUCAwKiAAakbEAIECIwKGJC6ASFAgMCogAGpGxACBAiMChiQugEhQIDAqIABqRsQAgQIjAoYkLoBIUCAwKiAAakbEAIECIwKGJC6ASFAgMCogAGpGxACBAiMChiQugEhQIDAqIABqRsQAgQIjAoYkLoBIUCAwNmMAakbEAIECIwKGJC6ASFAgMCogAGpGxACBAiMChiQugEhQIDAqIABqRsQAgQIjAoYkLoBIUCAwKiAAakbEAIECIwKGJC6ASFAgMCogAGpGxACBAiMChiQugEhQIDAqIABqRsQAgQIjAoYkLoBIUCAwKiAAakbEAIECIwKGJC6ASFAgMCogAGpGxACBAiMChiQugEhQIDAqIABqRsQAgQIjAoYkLoBIUCAwKiAAakbEAIECIwKGJC6ASFAgMCogAGpG5AjBAhsChiQugEhQIDAqIABqRsQAgQIjAoYkLoBIUCAwKiAAakbEAIECIwKGJC6ASFAgMCogAGpGxACBAiMChiQugEhQIDAqIABqRsQAgQIjAoYkLoBIUCAwKiAAakbEAIECIwKGJC6ASFAgMCogAGpGxACBAiMChiQugEhQIDAqIABqRsQAgQIjAoYkLoBIUCAwKiAAakbEAIECIwKGJC6ASFAgMCogAGpGxACBAiMChiQugEhQIDAqIABqRsQAgSObAoYkLoBIUCAwKiAAakbEAIECIwKGJC6ASFAgMCogAGpGxACBAiMChiQugEhQIDAqIABqRsQAgQIjAoYkLoBIUCAwKiAAakbEAIECIwKGJC6ASFAgMCogAGpGxACBAiMChiQugEhQIDA2cwnrbwIQlFvFHkAAAAASUVORK5CYII=";
             var savedImage = await CreateNewImage().ConfigureAwait(false);
 
             var response = await _httpClient.GetAsync($"v2/Images/{savedImage.Image.Id}/Thumbnail").ConfigureAwait(false);
@@ -175,11 +173,21 @@ namespace WebApi.Tests
         }
 
         [Test]
-        public async Task GetImageContent()
+        public async Task GetNewImageContentReturnsNotFound()
         {
             var savedImage = await CreateNewImage().ConfigureAwait(false);
 
             var response = await _httpClient.GetAsync($"v2/Images/{savedImage.Image.Id}/Content").ConfigureAwait(false);
+
+            Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Test]
+        public async Task GetImageContent()
+        {
+            var savedImage = await CreateNewImage().ConfigureAwait(false);
+
+            var response = await _httpClient.GetAsync($"/Images/{savedImage.Image.Filename}").ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -205,24 +213,10 @@ namespace WebApi.Tests
                     Description = "newDescription",
                     Annotation = ObjectId.GenerateNewId().ToString(),
                     Id = savedImage.Image.Id,
-                    ContentId = ObjectId.GenerateNewId().ToString(),
                     Filename = "newFilename",
                     Inverted = ObjectId.GenerateNewId().ToString(),
-                    Revisions = new List<Revision> { new Revision
-                    {
-                        ContentId = ObjectId.GenerateNewId().ToString(),
-                        Description = "revision description",
-                        Filename = "revisionfilename",
-                        RevisionDate = DateTime.Now,
-                        RevisionId = ObjectId.GenerateNewId().ToString(),
-                        Thumb = new Thumbnail
-                        {
-                            ContentId = ObjectId.GenerateNewId().ToString(),
-                            Filename = "revisionThumbFilename"
-                        }
-                    } },
                     Tags = new []{"newTag1"},
-                    Thumb = new Thumbnail { ContentId = ObjectId.GenerateNewId().ToString(), Filename = "updateThumbFilename"},
+                    Thumb = new Thumbnail { ContentId = savedImage.Image.Thumb.ContentId.ToString(), Filename = "updateThumbFilename"},
                     Title = "updatedTitle"
                 },
                 password = new ConfigurationManager(new LocalFile()).GetPassword(),
@@ -235,39 +229,12 @@ namespace WebApi.Tests
             Assert.That(updatedImage.Image.Date, Is.EqualTo(update.image.Date));
             Assert.That(updatedImage.Image.Description, Is.EqualTo(update.image.Description));
             Assert.That(updatedImage.Image.Annotation, Is.EqualTo(update.image.Annotation));
-            Assert.That(updatedImage.Image.ContentId, Is.EqualTo(update.image.ContentId));
             Assert.That(updatedImage.Image.Filename, Is.EqualTo(update.image.Filename));
             Assert.That(updatedImage.Image.Inverted, Is.EqualTo(update.image.Inverted));
-            Assert.That(updatedImage.Image.Revisions.Single().Description, Is.EqualTo(update.image.Revisions.Single().Description));
-            Assert.That(updatedImage.Image.Revisions.Single().ContentId, Is.EqualTo(update.image.Revisions.Single().ContentId));
-            Assert.That(updatedImage.Image.Revisions.Single().Filename, Is.EqualTo(update.image.Revisions.Single().Filename));
-            Assert.That(updatedImage.Image.Revisions.Single().RevisionDate, Is.EqualTo(update.image.Revisions.Single().RevisionDate));
-            Assert.That(updatedImage.Image.Revisions.Single().RevisionId, Is.EqualTo(update.image.Revisions.Single().RevisionId));
-            Assert.That(updatedImage.Image.Revisions.Single().Thumb.ContentId, Is.EqualTo(update.image.Revisions.Single().Thumb.ContentId));
-            Assert.That(updatedImage.Image.Revisions.Single().Thumb.Filename, Is.EqualTo(update.image.Revisions.Single().Thumb.Filename));
             Assert.That(updatedImage.Image.Tags.Single(), Is.EqualTo(update.image.Tags.Single()));
             Assert.That(updatedImage.Image.Thumb.ContentId, Is.EqualTo(update.image.Thumb.ContentId));
             Assert.That(updatedImage.Image.Thumb.Filename, Is.EqualTo(update.image.Thumb.Filename));
             Assert.That(updatedImage.Image.Title, Is.EqualTo(update.image.Title));
-        }
-
-        [Test]
-        public async Task GetContentById()
-        {
-            var savedImage = await CreateNewImage().ConfigureAwait(false);
-            var revision = await CreateRevision(savedImage.Image.Id).ConfigureAwait(false);
-            
-            var response = await _httpClient.GetAsync($"v2/Images/Content/{revision.ContentId}").ConfigureAwait(false);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception($"Error in {nameof(GetContentById)}. Status code: {response.StatusCode}");
-            }
-
-            var responseBytes = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
-            var base64response = Convert.ToBase64String(responseBytes);
-
-            Assert.AreEqual(_newImageBase64, base64response);
         }
 
         [Test]
@@ -377,8 +344,8 @@ namespace WebApi.Tests
             }
 
             var stringResponse = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var image = JsonConvert.DeserializeObject<Image>(stringResponse);
-            var revision = image.Revisions.OrderByDescending(x => x.RevisionDate).First();
+            var image = JsonConvert.DeserializeObject<ImageResponse>(stringResponse);
+            var revision = image.Image.Revisions.OrderByDescending(x => x.RevisionDate).First();
             RevisionToDelete.Add(new Tuple<string,string>(id,revision.RevisionId));
             return revision;
         }

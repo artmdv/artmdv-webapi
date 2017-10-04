@@ -6,7 +6,7 @@
     <AssemblyName>artmdv-webapi</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>artmdv-webapi</PackageId>
-    <PackageTargetFallback>$(PackageTargetFallback);dotnet5.6;portable-net45+win8</PackageTargetFallback>
+    <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81;</AssetTargetFallback>
   </PropertyGroup>
 
   <ItemGroup>
