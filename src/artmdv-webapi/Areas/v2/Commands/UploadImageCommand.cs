@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.IO;
 using artmdv_webapi.Areas.v2.Models;
-using Microsoft.Net.Http.Headers;
 
 namespace artmdv_webapi.Areas.v2.Command
 {
@@ -14,32 +9,26 @@ namespace artmdv_webapi.Areas.v2.Command
         public Image Image { get; set; }
         
 
-        public UploadImageCommand(ImageUploadDto model)
+        public UploadImageCommand(ImageUploadDto model, Stream file, string fileName)
         {
-            if (model?.file?.Length > 0)
+            if (file?.Length > 0)
             {
-                var filename = ContentDispositionHeaderValue
-                    .Parse(model.file.ContentDisposition)
-                    .FileName
-                    .ToString().Trim('"');
-
                 File = new MemoryStream();
-
-                var fileStream = model.file.OpenReadStream();
-                fileStream.CopyTo(File);
+                
+                file.CopyTo(File);
                 File.Position = 0;
-                fileStream.Dispose();
+                file.Dispose();
 
                 Image = new Image
                 {
-                    Filename = filename,
+                    Filename = fileName,
                     Description = model.description,
                     Title = model.title,
-                    Tags = model.tags.Split(','),
+                    Tags = model.tags?.Split(',') ?? new []{"default"},
                     Date = model.date,
                     Thumb = new Thumbnail
                     {
-                        Filename = $"thumb_{filename}"
+                        Filename = $"thumb_{fileName}"
                     },
                     Annotation = model.annotation,
                     Inverted = model.inverted

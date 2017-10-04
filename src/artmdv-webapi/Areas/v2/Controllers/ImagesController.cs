@@ -58,7 +58,14 @@ namespace artmdv_webapi.Areas.v2.Controllers
                     throw new UnauthorizedAccessException();
                 }
 
-                var cmd = new UploadImageCommand(model);
+                var filename = ContentDispositionHeaderValue
+                    .Parse(model.file.ContentDisposition)
+                    .FileName
+                    .ToString().Trim('"');
+                
+                var fileStream = model.file.OpenReadStream();
+
+                var cmd = new UploadImageCommand(model, fileStream, filename);
 
                 var imageId = await UploadImageCommandHandler.HandleAsync(cmd).ConfigureAwait(false);
 
