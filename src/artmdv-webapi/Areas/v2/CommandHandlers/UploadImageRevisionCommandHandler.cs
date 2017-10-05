@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using artmdv_webapi.Areas.v2.Commands;
 using artmdv_webapi.Areas.v2.Models;

@@ -15,24 +15,17 @@ namespace artmdv_webapi.Areas.v2.Commands
         public Revision Revision { get; set; }
         public string ImageId { get; set; }
 
-        public UploadImageRevisionCommand(ImageRevisionDto model)
+        public UploadImageRevisionCommand(ImageRevisionDto model, Stream file, string filename)
         {
-            if (model?.file?.Length > 0)
+            if (file?.Length > 0)
             {
                 var datenow = DateTime.Now;
 
-                var filename = ContentDispositionHeaderValue
-                    .Parse(model.file.ContentDisposition)
-                    .FileName
-                    .ToString()
-                    .Trim('"');
-
                 File = new MemoryStream();
-
-                var fileStream = model.file.OpenReadStream();
-                fileStream.CopyTo(File);
+                
+                file.CopyTo(File);
                 File.Position = 0;
-                fileStream.Dispose();
+                file.Dispose();
 
                 ImageId = model.imageId;
 
