@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using artmdv_webapi.Areas.v2.Command;
 using artmdv_webapi.Areas.v2.CommandHandlers;
 using artmdv_webapi.Areas.v2.Commands;
@@ -39,7 +40,8 @@ namespace artmdv_webapi2
             services.AddTransient<IHandler<SetFeaturedImageCommand, object>, SetFeaturedImageHandler>();
             services.AddTransient<IHandler<UploadImageCommand, string>, UploadImageCommandHandler>();
             services.AddTransient<IHandler<UploadImageRevisionCommand, object>, UploadImageRevisionCommandHandler>();
-            services.AddTransient<IQuery<FeaturedImageViewModel>, FeaturedImageQuery>();
+            services.AddTransient<IQuery<FeaturedImageViewModel, QueryFilter>, FeaturedImageQuery>();
+            services.AddTransient<IQuery<List<Image>, TagFilter>, ImagesQuery>();
             services.AddTransient<IFile, LocalFile>();
             services.AddTransient<IDirectory, LocalDirectory>();
             services.AddTransient<ISecurityHandler, SecurityHandler>();

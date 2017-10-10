@@ -22,7 +22,7 @@ using JsonConvert = Newtonsoft.Json.JsonConvert;
 namespace WebApi.Tests
 {
     [TestFixture, Explicit]
-    [Ignore("not now")]
+//    [Ignore("not now")]
     public class IntegrationTests
     {
         private HttpClient _httpClient = new HttpClient {BaseAddress = new Uri("http://localhost:5004")};

@@ -28,13 +28,11 @@ namespace WebApi.Tests
         [Test]
         public void CallingImageContentReturnsStream()
         {
-            var securityHandler = new Mock<ISecurityHandler>();
-            securityHandler.Setup(x => x.IsValidPassword(It.IsAny<string>())).Returns(true);
             var dataAccessMock = new Mock<IImageRepository>();
             var stream = new MemoryStream();
             stream.WriteByte(1);
             dataAccessMock.Setup(x => x.GetImageContent(It.IsAny<string>())).Returns(stream);
-            var controller = new ImagesController(dataAccessMock.Object, null, null, null, null, _securityHandler.Object);
+            var controller = new ImagesController(dataAccessMock.Object, null, null);
             var guid = Guid.NewGuid().ToString();
             var result = controller.GetImageContent(guid);
 
@@ -51,7 +49,7 @@ namespace WebApi.Tests
             var stream = new MemoryStream();
             stream.WriteByte(1);
             dataAccessMock.Setup(x => x.GetAnnotationContent(It.IsAny<string>())).Returns(stream);
-            var controller = new ImagesController(dataAccessMock.Object, null, null, null, null, _securityHandler.Object);
+            var controller = new ImagesController(dataAccessMock.Object, null, null);
             var guid = Guid.NewGuid().ToString();
             var result = controller.GetAnnotation(guid);
 
@@ -66,7 +64,7 @@ namespace WebApi.Tests
             var stream = new MemoryStream();
             stream.WriteByte(1);
             dataAccessMock.Setup(x => x.GetByContentId(It.IsAny<string>())).Returns(stream);
-            var controller = new ImagesController(dataAccessMock.Object, null, null, null, null, _securityHandler.Object);
+            var controller = new ImagesController(dataAccessMock.Object, null, null);
             var guid = Guid.NewGuid().ToString();
             var result = controller.GetContentById(guid);
 
@@ -85,7 +83,7 @@ namespace WebApi.Tests
             dataAccessMock.Setup(x => x.Get(It.IsAny<string>())).Returns(image);
             dataAccessMock.Setup(x => x.GetPath(It.IsAny<Image>())).Returns("ImagePath");
 
-            var controller = new ImagesController(dataAccessMock.Object, null, null, null, null, _securityHandler.Object);
+            var controller = new ImagesController(dataAccessMock.Object, null, null);
             SetupImagePath(controller);
 
             var guid = Guid.NewGuid().ToString();
@@ -99,12 +97,12 @@ namespace WebApi.Tests
         [Test]
         public void CallingGetFeaturedImageCallsQueryGet()
         {
-            var featuredImageQueryMock = new Mock<IQuery<FeaturedImageViewModel>>();
-            var controller = new ImagesController(null, featuredImageQueryMock.Object, null, null, null, _securityHandler.Object);
+            var featuredImageQueryMock = new Mock<IQuery<FeaturedImageViewModel, QueryFilter>>();
+            var controller = new ImagesController(null, featuredImageQueryMock.Object, null);
             
             controller.GetFeaturedImage();
 
-            featuredImageQueryMock.Verify(x=>x.Get());
+            featuredImageQueryMock.Verify(x=>x.Get(It.IsAny<QueryFilter>()));
         }
 
         private void SetupImagePath(Controller controller)
