@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using artmdv_webapi.Areas.v2.Command;
+using artmdv_webapi.Areas.v2.Core;
 using artmdv_webapi.Areas.v2.Infrastructure;
 using artmdv_webapi.Areas.v2.Models;
 using artmdv_webapi.Areas.v2.Query;
@@ -55,8 +56,8 @@ namespace artmdv_webapi2
             app.UseStaticFiles(new StaticFileOptions()
             {
                 FileProvider = new PhysicalFileProvider(
-            Path.Combine(Directory.GetCurrentDirectory(), @"Images")),
-                RequestPath = new PathString("/Images")
+            Path.Combine(Directory.GetCurrentDirectory(), ConfigurationManager.GetValue("ImageDirectory"))),
+                RequestPath = new PathString($"/{ConfigurationManager.GetValue("ImageDirectory")}")
             });
 
             // Add MVC to the request pipeline.
