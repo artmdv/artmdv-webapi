@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using artmdv_webapi.Areas.v2.Command;
-using artmdv_webapi.Areas.v2.CommandHandlers;
-using artmdv_webapi.Areas.v2.Commands;
-using artmdv_webapi.Areas.v2.Core;
 using artmdv_webapi.Areas.v2.Models;
 using artmdv_webapi.Areas.v2.Query;
 using artmdv_webapi.Areas.v2.Repository;
 using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Image = artmdv_webapi.Areas.v2.Models.Image;
 

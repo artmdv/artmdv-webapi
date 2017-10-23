@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using artmdv_webapi.Areas.v2.Controllers;
 using artmdv_webapi.Areas.v2.Core;
 using artmdv_webapi.Areas.v2.Models;
@@ -95,12 +96,12 @@ namespace WebApi.Tests
         }
 
         [Test]
-        public void CallingGetFeaturedImageCallsQueryGet()
+        public async Task CallingGetFeaturedImageCallsQueryGet()
         {
             var featuredImageQueryMock = new Mock<IQuery<FeaturedImageViewModel, QueryFilter>>();
             var controller = new ImagesController(null, featuredImageQueryMock.Object, null);
             
-            controller.GetFeaturedImage();
+            await controller.GetFeaturedImage().ConfigureAwait(false);
 
             featuredImageQueryMock.Verify(x=>x.Get(It.IsAny<QueryFilter>()));
         }
