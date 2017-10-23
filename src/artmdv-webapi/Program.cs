@@ -15,7 +15,7 @@ namespace artmdv_webapi2
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
-                .UseUrls("http://localhost:5004/")
+                .UseUrls($"http://localhost:{ConfigurationManager.GetValue("port")}/")
                 .Build();
     }
 }
