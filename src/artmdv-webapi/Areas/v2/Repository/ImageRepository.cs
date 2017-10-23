@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using artmdv_webapi.Areas.v2.Core;
 using artmdv_webapi.Areas.v2.Infrastructure;
 using artmdv_webapi.Areas.v2.Models;
 using MongoDB.Bson;
@@ -28,7 +29,7 @@ namespace artmdv_webapi.Areas.v2.Repository
             File = file;
             Directory = directory;
             var client = new MongoClient("mongodb://localhost:27017");
-            Database = client.GetDatabase("v2");
+            Database = client.GetDatabase(ConfigurationManager.GetValue("database"));
             Collection = Database.GetCollection<Image>("Images");
             GridFs = new GridFSBucket(Database);
 
@@ -216,7 +217,7 @@ namespace artmdv_webapi.Areas.v2.Repository
             }
             if (File.Exists($"{ImageDirectory}/{image.Id}{Path.GetExtension(image.Filename)}"))
             {
-                return $"Images/{image.Id}{Path.GetExtension(image.Filename)}";
+                return $"{ImageDirectory}/{image.Id}{Path.GetExtension(image.Filename)}";
             }
             return null;
         }
@@ -245,7 +246,7 @@ namespace artmdv_webapi.Areas.v2.Repository
             }
             if (File.Exists($"{ImageDirectory}/{image.ContentId}{Path.GetExtension(image.Filename)}"))
             {
-                return $"Images/{image.ContentId}{Path.GetExtension(image.Filename)}";
+                return $"{ImageDirectory}/{image.ContentId}{Path.GetExtension(image.Filename)}";
             }
             return null;
         }

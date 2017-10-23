@@ -12,3 +12,5 @@ config.json
 test.html
 src/artmdv-webapi/wwwroot/Images/
 src/artmdv-webapi/Images/
+
+*.coverage
