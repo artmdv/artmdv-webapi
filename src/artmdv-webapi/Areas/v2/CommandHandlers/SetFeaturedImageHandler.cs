@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Threading.Tasks;
+using artmdv_webapi.Areas.v2.Command;
 using artmdv_webapi.Areas.v2.Models;
 using artmdv_webapi.Areas.v2.Repository;
 
-namespace artmdv_webapi.Areas.v2.Command
+namespace artmdv_webapi.Areas.v2.CommandHandlers
 {
-    public class SetFeaturedImageHandler: IHandler<SetFeaturedImageCommand>
+    public class SetFeaturedImageHandler: IHandler<SetFeaturedImageCommand, object>
     {
         public IFeaturedImageRepository Repository { get; }
 
@@ -13,7 +15,7 @@ namespace artmdv_webapi.Areas.v2.Command
             Repository = repository;
         }
         
-        public void Handle(SetFeaturedImageCommand model)
+        public Task<object> HandleAsync(SetFeaturedImageCommand model)
         {
             var image = new FeaturedImage
             {
@@ -22,6 +24,8 @@ namespace artmdv_webapi.Areas.v2.Command
             };
 
             Repository.Save(image);
+
+            return Task.FromResult<object>(null);
         }
     }
 }

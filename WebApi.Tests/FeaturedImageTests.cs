@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Threading.Tasks;
 using artmdv_webapi.Areas.v2.Command;
+using artmdv_webapi.Areas.v2.CommandHandlers;
 using artmdv_webapi.Areas.v2.Models;
 using artmdv_webapi.Areas.v2.Query;
 using artmdv_webapi.Areas.v2.Repository;
@@ -13,7 +15,7 @@ namespace WebApi.Tests
     public class FeaturedImageTests
     {
         [Test]
-        public void CallingFeaturedImageQueryGetReturnsFeaturedImage()
+        public async Task CallingFeaturedImageQueryGetReturnsFeaturedImage()
         {
             var image = new FeaturedImage
             {
@@ -23,7 +25,7 @@ namespace WebApi.Tests
             var repositoryMock = new Mock<IFeaturedImageRepository>();
             repositoryMock.Setup(x => x.GetLatest()).Returns(image);
             var query = new FeaturedImageQuery(repositoryMock.Object);
-            var featuredImage = query.Get();
+            var featuredImage = await query.Get(null).ConfigureAwait(false);
             Assert.That(featuredImage, Is.Not.Null);
             Assert.That(featuredImage.Date, Is.Not.Null);
             Assert.That(featuredImage.ImageId, Is.Not.Null);
@@ -36,7 +38,7 @@ namespace WebApi.Tests
         {
             var repositoryMock = new Mock<IFeaturedImageRepository>();
             var handler = new SetFeaturedImageHandler(repositoryMock.Object);
-            handler.Handle(new SetFeaturedImageCommand(ObjectId.GenerateNewId().ToString()));
+            handler.HandleAsync(new SetFeaturedImageCommand(ObjectId.GenerateNewId().ToString()));
 
             repositoryMock.Verify(x=>x.Save(It.IsAny<FeaturedImage>()));
         }
@@ -46,7 +48,7 @@ namespace WebApi.Tests
         {
             var repositoryMock = new Mock<IFeaturedImageRepository>();
             var handler = new SetFeaturedImageHandler(repositoryMock.Object);
-            handler.Handle(new SetFeaturedImageCommand(ObjectId.GenerateNewId().ToString()));
+            handler.HandleAsync(new SetFeaturedImageCommand(ObjectId.GenerateNewId().ToString()));
 
             repositoryMock.Verify(x=>x.Save(It.Is<FeaturedImage>(img=>img.ImageId != null && img.ImageId != ObjectId.Empty && img.Date != null && img.Date != default(DateTime) )));
         }

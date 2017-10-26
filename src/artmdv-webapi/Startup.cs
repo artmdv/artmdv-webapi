@@ -1,5 +1,8 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using artmdv_webapi.Areas.v2.Command;
+using artmdv_webapi.Areas.v2.CommandHandlers;
+using artmdv_webapi.Areas.v2.Commands;
 using artmdv_webapi.Areas.v2.Core;
 using artmdv_webapi.Areas.v2.Infrastructure;
 using artmdv_webapi.Areas.v2.Models;
@@ -19,17 +22,15 @@ namespace artmdv_webapi2
 {
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        private IConfigurationManager _configurationManager;
+
+        public Startup(IConfiguration configuration)
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
-                .AddEnvironmentVariables();
-            Configuration = builder.Build();
+            Configuration = configuration;
+            _configurationManager = new ConfigurationManager(new LocalFile());
         }
 
-        public IConfigurationRoot Configuration { get; }
+        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -39,10 +40,15 @@ namespace artmdv_webapi2
             services.AddCors(x => x.AddPolicy("default", y => y.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
             services.AddSingleton<IImageRepository, ImageRepository>();
             services.AddTransient<IFeaturedImageRepository, FeaturedImageRepository>();
-            services.AddTransient<IHandler<SetFeaturedImageCommand>, SetFeaturedImageHandler>();
-            services.AddTransient<IQuery<FeaturedImageViewModel>, FeaturedImageQuery>();
+            services.AddTransient<IHandler<SetFeaturedImageCommand, object>, SetFeaturedImageHandler>();
+            services.AddTransient<IHandler<UploadImageCommand, string>, UploadImageCommandHandler>();
+            services.AddTransient<IHandler<UploadImageRevisionCommand, object>, UploadImageRevisionCommandHandler>();
+            services.AddTransient<IQuery<FeaturedImageViewModel, QueryFilter>, FeaturedImageQuery>();
+            services.AddTransient<IQuery<List<Image>, TagFilter>, ImagesQuery>();
             services.AddTransient<IFile, LocalFile>();
             services.AddTransient<IDirectory, LocalDirectory>();
+            services.AddTransient<ISecurityHandler, SecurityHandler>();
+            services.AddTransient<IConfigurationManager, ConfigurationManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -56,8 +62,8 @@ namespace artmdv_webapi2
             app.UseStaticFiles(new StaticFileOptions()
             {
                 FileProvider = new PhysicalFileProvider(
-            Path.Combine(Directory.GetCurrentDirectory(), ConfigurationManager.GetValue("ImageDirectory"))),
-                RequestPath = new PathString($"/{ConfigurationManager.GetValue("ImageDirectory")}")
+            Path.Combine(Directory.GetCurrentDirectory(), _configurationManager.GetValue("ImageDirectory"))),
+                RequestPath = new PathString($"/{_configurationManager.GetValue("ImageDirectory")}")
             });
 
             // Add MVC to the request pipeline.

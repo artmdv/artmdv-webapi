@@ -16,6 +16,7 @@ namespace artmdv_webapi.Areas.v2.Repository
 {
     public class ImageRepository : IImageRepository
     {
+        private readonly IConfigurationManager _configurationManager;
         public IFile File { get; }
         public IDirectory Directory { get; }
         private GridFSBucket GridFs { get; set; }
@@ -24,12 +25,13 @@ namespace artmdv_webapi.Areas.v2.Repository
 
         private string ImageDirectory { get; set; }
 
-        public ImageRepository(IFile file, IDirectory directory)
+        public ImageRepository(IFile file, IDirectory directory, IConfigurationManager configurationManager)
         {
+            _configurationManager = configurationManager;
             File = file;
             Directory = directory;
             var client = new MongoClient("mongodb://localhost:27017");
-            Database = client.GetDatabase(ConfigurationManager.GetValue("database"));
+            Database = client.GetDatabase(_configurationManager.GetValue("database"));
             Collection = Database.GetCollection<Image>("Images");
             GridFs = new GridFSBucket(Database);
 
@@ -176,7 +178,7 @@ namespace artmdv_webapi.Areas.v2.Repository
             {
                 return await Collection.Find(x=>x.Tags != null).ToListAsync().ConfigureAwait(false);
             }
-            return await Collection.Find(x=>x.Tags.Any(y=>tag.Split(',').Contains(y))).ToListAsync().ConfigureAwait(false);
+            return await Collection.Find(x=>x.Tags.Any(y=>tag.Split(',', StringSplitOptions.RemoveEmptyEntries).Contains(y))).ToListAsync().ConfigureAwait(false);
         }
 
         public void Delete(string id)
@@ -184,7 +186,13 @@ namespace artmdv_webapi.Areas.v2.Repository
             var image = Get(id);
             if (image != null)
             {
-                GridFs.Delete(ObjectId.Parse(image.ContentId));
+                if (image.ContentId != null)
+                {
+                    GridFs.Delete(ObjectId.Parse(image.ContentId));
+                }
+                
+                File.Delete(image.Filename);
+
                 GridFs.Delete(ObjectId.Parse(image.Thumb.ContentId));
 
                 var builder = Builders<Image>.Filter;

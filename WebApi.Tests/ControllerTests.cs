@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using artmdv_webapi.Areas.v2.Controllers;
+using artmdv_webapi.Areas.v2.Core;
 using artmdv_webapi.Areas.v2.Models;
 using artmdv_webapi.Areas.v2.Query;
 using artmdv_webapi.Areas.v2.Repository;
@@ -15,6 +17,15 @@ namespace WebApi.Tests
     [TestFixture]
     public class ControllerTests
     {
+        private Mock<ISecurityHandler> _securityHandler;
+
+        [OneTimeSetUp]
+        public void OneTimeSetup()
+        {
+            _securityHandler = new Mock<ISecurityHandler>();
+            _securityHandler.Setup(x => x.IsValidPassword(It.IsAny<string>())).Returns(true);
+        }
+
         [Test]
         public void CallingImageContentReturnsStream()
         {
@@ -85,14 +96,14 @@ namespace WebApi.Tests
         }
 
         [Test]
-        public void CallingGetFeaturedImageCallsQueryGet()
+        public async Task CallingGetFeaturedImageCallsQueryGet()
         {
-            var featuredImageQueryMock = new Mock<IQuery<FeaturedImageViewModel>>();
+            var featuredImageQueryMock = new Mock<IQuery<FeaturedImageViewModel, QueryFilter>>();
             var controller = new ImagesController(null, featuredImageQueryMock.Object, null);
             
-            controller.GetFeaturedImage();
+            await controller.GetFeaturedImage().ConfigureAwait(false);
 
-            featuredImageQueryMock.Verify(x=>x.Get());
+            featuredImageQueryMock.Verify(x=>x.Get(It.IsAny<QueryFilter>()));
         }
 
         private void SetupImagePath(Controller controller)

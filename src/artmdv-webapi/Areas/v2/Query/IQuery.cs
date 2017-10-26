@@ -1,8 +1,10 @@
-﻿namespace artmdv_webapi.Areas.v2.Query
+﻿using System.Threading.Tasks;
+
+namespace artmdv_webapi.Areas.v2.Query
 
 {
-    public interface IQuery<TModel>
+    public interface IQuery<TModel,TFilter>
     {
-        TModel Get();
+        Task<TModel> Get(TFilter filter);
     }
 }
