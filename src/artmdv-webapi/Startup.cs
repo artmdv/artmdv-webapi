@@ -22,9 +22,12 @@ namespace artmdv_webapi2
 {
     public class Startup
     {
+        private IConfigurationManager _configurationManager;
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            _configurationManager = new ConfigurationManager(new LocalFile());
         }
 
         public IConfiguration Configuration { get; }
@@ -59,8 +62,8 @@ namespace artmdv_webapi2
             app.UseStaticFiles(new StaticFileOptions()
             {
                 FileProvider = new PhysicalFileProvider(
-            Path.Combine(Directory.GetCurrentDirectory(), ConfigurationManager.GetValue("ImageDirectory"))),
-                RequestPath = new PathString($"/{ConfigurationManager.GetValue("ImageDirectory")}")
+            Path.Combine(Directory.GetCurrentDirectory(), _configurationManager.GetValue("ImageDirectory"))),
+                RequestPath = new PathString($"/{_configurationManager.GetValue("ImageDirectory")}")
             });
 
             // Add MVC to the request pipeline.

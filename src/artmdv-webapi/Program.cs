@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using artmdv_webapi.Areas.v2.Core;
+using artmdv_webapi.Areas.v2.Infrastructure;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
@@ -12,10 +14,13 @@ namespace artmdv_webapi2
             BuildWebHost(args).Run();
         }
 
-        public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
+        public static IWebHost BuildWebHost(string[] args)
+        {
+            var cfg = new ConfigurationManager(new LocalFile());
+            return WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
-                .UseUrls($"http://localhost:{ConfigurationManager.GetValue("port")}/")
+                .UseUrls($"http://localhost:{cfg.GetValue("port")}/")
                 .Build();
+        }
     }
 }
